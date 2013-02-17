@@ -1,0 +1,303 @@
+Regression and Variable Selection
+========================================================
+
+The objective of this case is to get you started with regression model building, variable selection, and model evaluation in R, and help you with Case 2.
+
+Code in this file is not the only correct way to do things, however it is important for you to understand what each statement does. You will have to modify the code accordingly for your homework. 
+
+Boston Housing Data
+-------
+### Load Data
+```{r}
+library(MASS)
+data(Boston); #this data is in MASS package
+colnames(Boston) 
+```
+The original data are 506 observations on 14 variables, medv being the response variable $y$:
+
+Variable |Description
+---------|-----
+crim | per capita crime rate by town
+zn	 |proportion of residential land zoned for lots over 25,000 sq.ft
+indus	| proportion of non-retail business acres per town
+chas	| Charles River dummy variable (= 1 if tract bounds river; 0 otherwise)
+nox	| nitric oxides concentration (parts per 10 million)
+rm	| average number of rooms per dwelling
+age	| proportion of owner-occupied units built prior to 1940
+dis	| weighted distances to five Boston employment centres
+rad	| index of accessibility to radial highways
+tax	| full-value property-tax rate per USD 10,000
+ptratio	| pupil-teacher ratio by town
+black	|1000(B - 0.63)^2 where B is the proportion of blacks by town
+lstat	| percentage of lower status of the population
+medv	| median value of owner-occupied homes in USD 1000's
+
+### Sampling (Split Dataset Randomly)
+Next we sample 90% of the original data and use it as the training set. The remaining 10% is used as test set. The regression model will be built on the training set and future performance of your model will be evaluated with the test set.
+
+```{r}
+subset <- sample(nrow(Boston),nrow(Boston)*0.90)
+Boston_train = Boston[subset,]
+Boston_test = Boston[-subset,]
+```
+
+### (Optional) Standardization
+If we want our results to be invariant to the units and the parameter estimates $\beta_i$ to be comparible, we can standardize the variables. Essentially we are replacing the original values with their z-score.
+
+1st Way: create new variables manually.
+```{r, eval=FALSE}
+Boston$sd.crim<-(Boston$crim-mean(Boston$crim))/sd(Boston$crim); 
+```
+
+This does the same thing.
+```{r,eval=FALSE}
+Boston$sd.crim<- scale(Boston$crim); 
+```
+
+
+2nd way: If you have a lot of variables to standardize then the above is not very pleasing to do. You can use a loop like this. It standardizes every varables other than the last one which is $y$.
+
+```{r}
+for (i in 1:(ncol(Boston_train)-1)){
+  Boston_train[,i] = scale(Boston_train[,i])
+}
+```
+
+The technique is not as important in linear regression because it will only affect the interpretation but not the model estimation and inference. 
+
+Model Building
+------------------
+You task is to build a best model with training data. You can refer to the regression and variable selection code on the slides for more detailed description of linear regression.
+
+The following model includes all $x$ varables in the model
+```{r, eval=FALSE}
+model_1 <- lm(medv~crim+zn+chas+nox+rm+dis+rad+tax+ptratio+black+lstat, data=Boston_train)
+```
+
+To include all variables in the model, you can write the statement this simpler way.
+
+```{r}
+model_1 <- lm(medv~., data=Boston_train)
+summary(model_1)
+```
+
+But, is this the model you want to use?
+
+### (Optional) Interaction terms in model
+If you suspect the effect of one predictor x1 on the response y depends on the value of another predictor x2, you can add interaction terms in model. To specify interaction in the model, you put : between two variables with interaction effect. For example
+```{r, eval=FALSE}
+lm(medv~crim+zn+crim:zn, data=Boston_train)
+#The following way automatically add the main effects of crim and zn
+lm(medv~crim*zn, data=Boston_train)
+```
+For now we will not investigate the interactions of variables.
+
+Evaluating Model Fitness 
+------------
+### In-sample model evaluation (train error)
+MSE of the regression, which is the square of 'Residual standard error' in the above summary. It is the sum of squared residuals(SSE) divided by degrees of freedom (n-p-1). In some textbooks the sum of squred residuals(SSE) is called residual sum of squares(RSS). MSE of the regression should be the unbiased estimator for variance of $\epsilon$, the error term in the regression model.
+
+```{r}
+model_summary <- summary(model_1)
+(model_summary$sigma)^2
+```
+
+$R^2$ of the model
+```{r}
+model_summary$r.squared
+```
+
+Adjusted-$R^2$ of the model, if you add a variable (or several in a group), SSE will decrease, $R^2$ will increase, but Adjusted-$R^2$ could go either way.
+```{r}
+model_summary$adj.r.squared
+```
+
+AIC and BIC of the model, these are information criteria. Smaller values indicate better fit.
+
+```{r}
+AIC(model_1)
+BIC(model_1)
+```
+
+BIC, AIC, and Adjusted $R^2$ have complexity penalty in the definition, thus when comparing across different models they are better indicators on how well the model will perform on future data.
+
+### Out-of-sample prediction (test error)
+To evaluate how the model performs on future data, we use predict() to get the predicted values from the test set.
+```{r, eval=FALSE}
+#pi is a vector that contains predicted values for test set.
+pi <- predict(object = model_1, newdata = Boston_test)
+```
+Just as any other function, you can write the above statement the following way as long as the arguments are in the right order.
+
+```{r, echo=FALSE}
+subset <- sample(nrow(Boston),nrow(Boston)*0.90)
+Boston_train = Boston[subset,]
+Boston_test = Boston[-subset,]
+model_1 <- lm(medv~., data=Boston_train)
+```
+
+```{r, eval=TRUE}
+pi <- predict(model_1, Boston_test)
+```
+
+The most common measure is the Mean Squared Error (MSE): average of the squared differences between the predicted and actual values
+```{r}
+mean((pi - Boston_test$medv)^2)
+```
+A less popular measure is the Mean Absolute Error (MAE). You can probably guess that here instead of taking the average of squared error, MAE is the average of absolute value of error.
+```{r}
+mean(abs(pi - Boston_test$medv))
+```
+
+Note that if you ignore the second argument of predict(), it gives you the in-sample prediction on the training set:
+```{r, eval=FALSE}
+predict(model_1)
+```
+Which is the same as
+```{r, eval=FALSE}
+model_1$fitted.values
+```
+
+
+Variable Selection
+------------------------
+### Compare Model Fit Manually
+```{r eval=FALSE}
+model_1 <- lm(medv~., data = Boston_train)
+model_2 <- lm(medv~crim+zn, data = Boston_train)
+summary(model_1)
+summary(model_2)
+AIC(model_1)
+AIC(model_2)
+```
+
+### Best Subset Regression
+The 'leaps' package provides procedures for best subset regression.
+```{r eval=FALSE}
+install.packages('leaps')
+```
+```{r, warning=FALSE}
+library(leaps)
+```
+Which subset of variables should you include in order to minimize BIC?
+```{r}
+#regsubsets only takes data frame as input
+subset_result <- regsubsets(medv~.,data=Boston_train, nbest=2, nvmax = 14)
+summary(subset_result)
+plot(subset_result, scale="bic")
+```
+Each row represents a model. Black indicates that a variable is included in the model, while white indicates that it is not. 
+The scale = "" can be "Cp", "adjr2", "r2" or "bic".
+
+What is the problem with best subset regression? If there are n independent variables, the number of possible nonempty subsets is 2^n - 1. If you try a best subset regression with more than 50 variables, you might need to wait for your entire life to get the result.
+
+<img src="http://science.slc.edu/~jmarshall/courses/2002/spring/cs50/BigO/running-times.gif" height="300px" />
+
+### Forward/Backward/Stepwise Regression Using AIC
+To perform the Forward/Backward/Stepwise Regression in R, we need to define the starting points:
+```{r}
+nullmodel=lm(medv~1, data=Boston_train)
+fullmodel=lm(medv~., data=Boston_train)
+```
+nullmodel is the model with no varaible in it, while fullmodel is the model with every variable in it.
+
+#### Backward Elimination
+```{r}
+model.step<-step(fullmodel,direction='backward')
+```
+
+#### Forward Selection
+```{r}
+model.step<-step(nullmodel, scope=list(lower=nullmodel, upper=fullmodel), direction='forward')
+```
+#### Stepwise Selection (Output Omitted)
+```{r, eval=FALSE}
+model.step<-step(nullmodel, scope=list(lower=nullmodel, upper=fullmodel), direction='both')
+```
+
+One caution when comparing fit statistics using AIC, the definition varies by program/procedure.
+```{r}
+extractAIC(model_1)
+AIC(model_1)
+```
+
+* For pros and cons of variable/model selection using the common fit statistics: (adjusted) $R^2$, MSE, AIC, BIC, etc. refer to Ch9 in "Applied Linear Regression Models" by Kutner et al.
+* For other variable selection methods refer to section 3.4 - 3.8 of ["Elements of Statistical Learning" (Free Online)](http://www-stat.stanford.edu/~tibs/ElemStatLearn/).
+
+Cross Validation
+-----------------
+Cross validation is an alternative approach to training/testing split. For k-fold cross validation, the dataset is divided into k parts. Each part serves as the test set in each iteration and the rest serve as training set. The out-of-sample performance measures from the k iterations are averaged.
+
+Note
+
+1. We use the **entire** dataset for cross validation
+
+2. We need to use glm instead of lm to fit the model (if we want to use cv.glm fucntion in boot package)
+
+3. The default measure of performance is the Mean Squared Error (MSE). If we want to use another measure we need to define a cost function.
+
+### 5-fold Cross Validation
+```{r}
+library(boot)
+model_2 = glm(medv~indus + rm, data = Boston)
+cv.glm(data = Boston, glmfit = model_2, K = 5)$delta[2]
+```
+### LOOCV (Leave-one-out Cross Validation)
+```{r}
+cv.glm(data = Boston, glmfit = model_2, K = nrow(Boston))$delta[2]
+```
+### 5-fold Cross Validation Using MAE
+Here we need to define a MAE cost function. The function takes 2 input vectors, pi =  predicted values, r = actual values.
+
+```{r}
+model_2 = glm(medv~indus + rm, data = Boston)
+
+MAE_cost = function(pi, r){
+  return(mean(abs(pi-r)))
+}
+
+cv.glm(data = Boston, glmfit = model_2, cost = MAE_cost, K = 5)$delta[2]
+```
+
+
+Another package DAAG also does cross validation. It prints out the performance in each fold and gives you a plot at the end. But currently I cannot figure out how to get the cross-validation error programmatically.
+
+```{r, eval=FALSE}
+install.packages('DAAG')
+```
+
+```{r,message=FALSE, eval=FALSE}
+library(DAAG)
+```
+```{r, warning=FALSE, eval=FALSE}
+model_2 = lm(medv~indus + rm, data = Boston)
+cv.lm(df=Boston, form.lm = model_2, m=3)
+```
+
+
+
+
+
+Diagnostic Plots
+-----------------
+The diagnostic plots are not as important when regression is used in predictive (supervised) data mining as when it is used in economics. However it is still good to know:
+
+1. What the diagnostic plots should look like when no assumption is violated?
+
+2. If there is something wrong, what assumptions are possibly violated?
+
+3. What implications does it have on the analysis?
+
+4. (How) can I fix it?
+
+Roughly speaking, the table summarizes what you should look for in the following plots
+
+Plot Name  | Good  
+------------- | -------------
+Residual vs. Fitted  | No pattern, scattered around 0 line
+Normal Q-Q | Dots fall on dashed line 
+Residual vs. Leverage | No observation with large Cook's distance
+
+```{r}
+plot(model_1)
+```
