@@ -1,0 +1,4 @@
+TODO: 
+1. Text analysis.
+2. Big data (mapreduce)
+3. Improving R performance

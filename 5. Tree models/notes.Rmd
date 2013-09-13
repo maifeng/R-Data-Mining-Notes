@@ -1,0 +1,256 @@
+Tree Models
+========================================================
+
+In this lab we will go through the model building, validation, and interpretation of tree models. The focus will be on *rpart* package.
+
+Regression Tree vs. Classification Tree
+--------------
+CART stands for classification and regression tree. 
+* Regression tree: response variable Y is numerical
+* Classification tree: response variable Y is categorical
+
+For the regression tree example, we will use the Boston Housing data. Recall the response variable is the housing price. For the classification tree example, we will use the credit scoring data. The response variable is whether the loan went to default.
+
+Note that unlkie logistic regreesion, the response variable does not have to be binary in case of classification tree. We can use classification tree on classification problems with more than 2 outcomes.
+
+Let us load the data sets. This time the training and test datasets are divided for you so we can get similar answers,
+
+```{r}
+boston.data = read.csv("http://homepages.uc.edu/~maifg/7040/boston.csv")
+boston.train = read.csv("http://homepages.uc.edu/~maifg/7040/boston.train.csv")
+boston.test = read.csv("http://homepages.uc.edu/~maifg/7040/boston.test.csv")
+
+credit.data = read.csv("http://homepages.uc.edu/~maifg/7040/credit0.csv")
+credit.train = read.csv("http://homepages.uc.edu/~maifg/7040/credit.train.csv")
+credit.test = read.csv("http://homepages.uc.edu/~maifg/7040/credit.test.csv")
+
+```
+
+We will use the 'rpart' library.
+```{r, eval=FALSE}
+install.packages('rpart')
+```
+
+```{r,warning=FALSE}
+library(rpart)
+```
+
+
+Fitting Models and Prediction
+--------
+### Fitting regression tree
+
+The simple form of the *rpart* function is similar to *lm* and *glm*. It takes a formula argument in which you specify the response and predictor variables, and a data argument in which you specify the data frame.
+
+```{r}
+boston.rpart <- rpart(formula = medv ~ ., data = boston.train)
+```
+
+#### Printing and ploting the tree
+```{r, message=FALSE,echo=FALSE}
+options(digits=7)
+```
+
+```{r}
+boston.rpart
+plot(boston.rpart)
+text(boston.rpart)
+```
+
+#### Prediction using regression tree
+
+The in-sample and out-of-sample prediction for regression tree is also similar to *lm* and *glm* models.
+
+In-sample prediction
+```{r}
+boston.train.pred.tree = predict(boston.rpart)
+```
+Out-of-sample prediction
+```{r}
+boston.test.pred.tree = predict(boston.rpart,boston.test)
+```
+
+The mean squred error loss for this tree model is
+```{r}
+mean((boston.test.pred.tree - boston.test$medv)^2)
+```
+
+We can compare this model's out-of-sample performance with the linear regression model with all variables in it.
+
+```{r}
+boston.reg = lm(medv~., data = boston.train)
+boston.test.pred.reg = predict(boston.reg, boston.test)
+mean((boston.test.pred.reg - boston.test$medv)^2)
+
+```
+
+
+### Fitting classification tree (when you know the cost function)
+
+The classification tree is slightly more complicated to specify. What makes it more complicated is that we often have asymmetric cost function. In the credit scoring case it means that false negatives (predicting 0 when truth is 1, or giving out loans that end up in default) will cost more than false positives (predicting 1 when truth is 0, rejecting loans that you should not reject).
+
+Here we make the assumption that false negative cost 10 times of false positive. In real life the cost structure should be carefully researched.
+
+```{r}
+credit.rpart <- rpart(formula = Y ~ . -id, data = credit.train, method = "class", parms = list(loss=matrix(c(0,10,1,0), nrow = 2)))
+```
+
+Note the following important differences from the regression tree:
+* The method = "class" is required if the response is not declared as factors.
+
+* The parms argument, which is a list. The most import element is the loss matrix. The diagonal elements are 0, and off-diagonal elements tells you the loss(cost) of classifying something wrong. For binary classification, the numbers in c() specify the cost in this sequence: c(0, False Negative, False Positive, 0).
+If you have symmetric cost, you can ignore the parms argument.
+
+For more advanced controls, you should carefully read the help document for the rpart function.
+
+#### Printing and ploting the tree
+
+```{r}
+credit.rpart
+plot(credit.rpart)
+text(credit.rpart)
+```
+
+#### Prediction using classification tree
+For a binary classification problem, as you learned in logistic regression there are 2 types of predictions. One is the predicted class of response (0 or 1), and the second type is the probability of response being 1. We use an additional argument type="class" or type="prob" to get these:
+
+In-sample prediction (skipped)
+
+Out-of-sample prediction
+```{r}
+#Predicted Class
+credit.test.pred.tree1 = predict(credit.rpart,credit.test, type="class")
+table(credit.test$Y, credit.test.pred.tree1, dnn=c("Truth","Predicted"))
+```
+
+Usually if you want a hassle-free model, using type="class" is enough **given that you specified the loss matrix correctly in rpart**.
+
+We can get the expected loss for this tree model by defining a cost function that has the correct weights:
+```{r}
+
+cost <- function(r, pi){
+  weight1 = 10
+  weight0 = 1
+  c1 = (r==1)&(pi==0) #logical vector - true if actual 1 but predict 0
+  c0 = (r==0)&(pi==1) #logical vecotr - true if actual 0 but predict 1
+  return(mean(weight1*c1+weight0*c0))
+}
+cost(credit.test$Y,credit.test.pred.tree1)
+```
+
+We can compare this model's out-of-sample performance with the logistic regression model with all variables in it. Recall that when we search for the optimal cut-off using the same cost function we get optimal cut-off at about 0.08.
+
+```{r, warning=FALSE}
+#Fit logistic regression model
+credit.glm = glm(Y~.-id, data = credit.train, family=binomial)
+#Get binary prediction
+credit.test.pred.glm = as.numeric(predict(credit.glm, credit.test, type="response")>0.08)
+#Calculate cost using test set
+cost(credit.test$Y,credit.test.pred.glm)
+#Confusion matrix
+table(credit.test$Y, credit.test.pred.glm, dnn=c("Truth","Predicted"))
+```
+
+Which model do you think is better?
+
+
+ROC Curve and Cut-off Probability for Classification Tree
+--------
+Recall that ROC Curve gives you the trade-off between hit rate (1 - false positive) and false negative, and area under the curve (AUC) can be used as a measure of how good the binary classification model performs when you do not know the cost function.
+
+To get ROC curve, we first fit a tree without the loss matrix, then get the predicted probability of Y being 1. The additional cp parameter controls the complexity of tree. Here we change it from its default 0.01 to a smaller value to grow a more complex tree than just the root node (if you use the default the tree you get will tell you to clasify everything as 0). More discussion on this in the next section. 
+
+```{r}
+credit.rpart2 <- rpart(formula = Y ~ . -id-X9, data = credit.train, method = "class", cp = 0.0005)
+#Probability of getting 1
+credit.test.prob.rpart2 = predict(credit.rpart2,credit.test, type="prob")
+```
+
+credit.test.prob.rpart2 has 2 columns, the first one is prob(Y) = 0 and the second prob(Y) = 1. We only need the second column because they add to 1 for binary classification.
+
+To get ROC curve we use 
+```{r, eval=FALSE}
+install.packages('ROCR')
+```
+
+```{r, message=FALSE, warning=FALSE}
+library(ROCR)
+```
+
+```{r}
+pred = prediction(credit.test.prob.rpart2[,2], credit.test$Y)
+perf = performance(pred, "tpr", "fpr")
+plot(perf, colorize=TRUE)
+```
+
+Area under the curve is given by (do not worry about the syntax here):
+```{r}
+slot(performance(pred, "auc"), "y.values")[[1]]
+```
+
+For a given cut-off probability, the 0/1 prediction result can be calculated similar to what you do in logistic regression
+```{r}
+credit.test.pred.rpart2 = as.numeric(credit.test.prob.rpart2[,2] > 0.1)
+table(credit.test$Y, credit.test.pred.rpart2, dnn=c("Truth","Predicted"))
+```
+
+If you know the cost structure of mis-classification, there is usually no need to search for an optimal cut-off probability as we did in the logistic regression. You can refer to the last section on specifying a loss matrix, rpart will automatically generate decision rules with your cost structure taken into consideration.
+
+#### Cumulative Gains Chart
+
+Cumulative Gains Chart is useful for certain types of binary classification problem. For example a direct marketing campaign, a cumulative gain chart answers the following question according to your model: what is the percentage of customers you need to contact in order to get the certain percentages of customers who will buy the product?
+
+Using the Portuguese banking direct marketing dataset as example:
+```{r}
+bank.train = read.csv("http://homepages.uc.edu/~maifg/7040/bank_train.csv")
+bank.test = read.csv("http://homepages.uc.edu/~maifg/7040/bank_test.csv")
+bank.pred.prob = predict(rpart(y~., bank.train),bank.test)
+plot(performance(prediction(bank.pred.prob, bank.test$y), "tpr", "rpp"))
+```
+
+The above graph tells you that using the predictive model, we only need to call about 40% of the customers (the 40% customers with the highest predicted probability) to get the 80% of the subscription.
+
+Pruning
+------------------
+In rpart(), the cp(complexity parameter) argument is one of the parameters that are used to control the compexity of the tree. The help document for rpart tells you "Any split that does not decrease the overall lack of fit by a factor of cp is not attempted". For a regression tree, the overall Rsquare must increase by cp at each step. Basically, the smaller the cp value, the larger (complex) tree rpart will attempt to fit.  The default value for cp is 0.01.
+
+What happens when you have a large tree? The following tree has 27 splits.  
+
+```{r}
+boston.largetree <- rpart(formula = medv ~ ., data = boston.train, cp = 0.001)
+```
+
+Try plot it yourself to see its structure.
+```{r, eval=FALSE}
+plot(boston.largetree)
+```
+
+The plotcp() function gives the relationship between 10-fold cross-validation error in the training set and size of tree.
+```{r}
+plotcp(boston.largetree)
+```
+You can observe from the above graph that the cross-validation error (x-val) does not always go down when the tree becomes more complex. The analogy is when you add more variables in a regression model, its ability to predict future observations not necessarily increases. In the Boston housing example, you may conclude that having a tree mode with more than 7-9 splits is not helptul.
+
+To look at the error vs size of tree more carefully, you can look at the following table:
+```{r}
+printcp(boston.largetree)
+```
+
+Root node error is the error when you do not do anything too smart in prediction, in regression case, it is the mean squared error(MSE) if you use the average of medv as the prediction. Note it is the same as
+```{r}
+sum((boston.train$medv - mean(boston.train$medv))^2)/455
+```
+The first 2 columns CP and nsplit tells you how large the tree is. rel.error $\times$ root node error gives you the in sample error. For example, The last row 0.13085*87.133 = 11.40135, which is the same as the in-sample MSE if you calculate using predict:
+
+```{r}
+mean((predict(boston.largetree) - boston.train$medv)^2)
+```
+xerror gives you the cross-validation (default is 10-fold) error. You can see that the rel error (in-sample error) is always decreasing as model is more complex, while the cross-validation error (measure of performance on future observations) is not. That is why we **prune** the tree to avoid overfitting the training data.
+
+The way rpart() does it is that it uses some default control parameters to avoid fitting a large tree. The main reason for this approach is to save computation time. For example by default rpart set a cp = 0.1 and the minimum number of observations that must exist in a node to be 20. Use ?rpart.control to view these parameters. Sometimes we wish to change these paramters to see how more complex trees will perform, as we did above. If we have a larger than necessary tree, we can use prune() function and specify a new cp:
+```{r}
+prune(boston.largetree, cp = 0.05)
+```
+Some software/packages can automatically prune the tree.
+
+

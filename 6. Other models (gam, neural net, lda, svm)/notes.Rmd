@@ -1,0 +1,562 @@
+Case 1 Lab
+==================
+
+This tutorial helps you to review various supervised learning techniques, introduce GAM, Neural Networks models, and prepare you to finish Case Study 1.
+
+****  
+<a id="content"></a> Content 
+-------------------
+### [Credit Score Data] (#data)   
+### [Generalized Linear Models](#glm)   
+### [Tree Models](#tree)   
+### [Generalized Additive Models (GAM)](#gam)  
+### [Discriminant Analysis](#da)
+### [Neural Networks Models](#nnet)
+### [Performance Comparisons](#compare)
+### [Starter Code for German Credit Score](#german)
+****
+
+### <a id="data"></a>Credit Score Data <a id="data"></a>
+#### Load Data
+
+
+```{r}
+credit.data <- read.csv("http://homepages.uc.edu/~maifg/7040/credit0.csv", header=T)
+nrows <- nrow(credit.data)
+#credit.data$X9 <- credit.data$X9 + rnorm(nrows,mean=0, sd=1)*.01
+```
+
+Now split the data 90/10 as training/testing datasets:
+```{r}
+set.seed(2013);
+subset <- sample(nrow(credit.data),nrow(credit.data)*0.90)
+credit.train = credit.data[subset,]
+credit.test = credit.data[-subset,]
+```
+The training dataset has 63 variables, 4500 obs. 
+```{r}
+colnames(credit.train)
+```
+
+### <a id="glm"></a> Generalized Linear Models (Logistic Regression)
+
+Let's build a logistic regression model based on all X variables. Note id is excluded from the model.
+```{r, warning=FALSE}
+
+credit.glm0<-glm(Y~.-id-X9,family=binomial,credit.train);  
+```
+
+You can view the result of the estimation:
+```{r, eval=FALSE}
+summary(credit.glm0)
+```
+
+Note that we choose to ignore *X9* because this variable may cause complete separation [learn more here](http://www.ats.ucla.edu/stat/mult_pkg/faq/general/complete_separation_logit_models.htm) or [here](http://support.sas.com/kb/22/599.html). 
+
+The usual stepwise variable selection still works for logistic regression. **caution: this will take a very long time**.
+```{r, eval=FALSE}
+credit.glm.step <- step(credit.glm0,direction=c("both")) 
+```
+Or you can try model selection with BIC:
+```{r, eval= FALSE}
+credit.glm.step <- step(credit.glm0, k=log(nrow(credit.train)),direction=c("both")) 
+```
+
+
+#### Prediction and Cross Validation Using Logistic Regression
+
+Now suppose there are 2 models we want to test, one with all X variables(credit.glm0), and one with X3, X8 and X11_2(credit.glm1).
+```{r}
+credit.glm1<-glm(Y~X3+X8+X11_2,family=binomial,credit.train); 
+AIC(credit.glm0)
+AIC(credit.glm1)
+BIC(credit.glm0)
+BIC(credit.glm1)
+credit.glm0$deviance #use str(credit.glm) to see how to obtain the deviance
+credit.glm1$deviance
+```
+The model with smaller AIC or BIC is a better model.
+
+#### Understanding classification decision making using logistic regression
+To get prediction from a logistic regression model, there are several steps you need to understand. Refer to textbook/slides for detailed math.
+
+1.The fitted model $\hat{\eta} = b_0 +b_1 x_1 + b_2 x_2 + ...$ gives you the estimated value before the inverse of link (logit in case of logistic regression). In logistic regression the $\hat{\eta}$ are called **log odds ratio**, which is $\log(P(y=1)/(1-P(y=1)))$. In R you use the *predict()* function to get a vector of all in-sample $\hat{\eta}$ (for each training ob).
+```{r, fig.width=6, fig.height=4}
+hist(predict(credit.glm1), col="lightgreen")
+```
+
+2.For each $\hat{\eta} = X\hat{\beta}$, in order to get the P(y=1), we can apply the inverse of the link function (logit here) to $\hat{\eta}$. The equation is $P(y=1) =  1/ (1+exp(-\hat{\eta}))$. In R you use the *fitted()* function or *predict(,type="response")* to get the **predicted probability** for each training observation.
+
+```{r, fig.width=6, fig.height=4}
+hist(predict(credit.glm1,type="response"), col="lightgreen")
+```
+
+3.Last but not least, you want a binary classification decision rule. The default rule is if the fitted $P(y=1) > 0.5$ then $y = 1$. The value 0.5 is called **cut-off probability**. You can choose the cut-off probability based on mis-classification rate, cost function, etc. In this case, the cost function can indicate the trade off between the risk of giving loan to someone who cannot pay (predict 0, truth 1), and risk of rejecting someone who qualifys (predict 1, truth 0).
+
+These tables illustrate the impact of choosing different cut-off probability. Choosing a large cut-off probability will result in few cases being predicted as 1, and chossing a small cut-off probability will result in many cases being predicted as 1.
+
+```{r}
+table(predict(credit.glm1,type="response") > 0.5)
+table(predict(credit.glm1,type="response") > 0.2)
+table(predict(credit.glm1,type="response") > 0.0001)
+```
+
+#### In-sample and out-of-sample prediction
+##### In-sample (performance on training set)
+Suppose the cut-off probability is choosen as 0.2. The 2nd statement generates a logical vector (TRUE or FALSE) of whether each ob in training set has a fitted probability greater than 0.2. The 3rd statement transforms the logical vector to numeric (0 or 1). 
+```{r}
+prob.glm1.insample <- predict(credit.glm1,type="response")
+predicted.glm1.insample <- prob.glm1.insample > 0.2
+predicted.glm1.insample <- as.numeric(predicted.glm1.insample)
+```
+Next we look at the confusion matrix, *dnn* is used to label the column and row:
+```{r}
+table(credit.train$Y, predicted.glm1.insample, dnn=c("Truth","Predicted"))
+```
+There are many ways to calculate the error rate. The following is one way. The *ifelse* function returns a vector, the elements are 1 if actual != predicted, 0 otherwise. *mean* gives you the percentage of 1s in the vector.
+```{r}
+mean(ifelse(credit.train$Y != predicted.glm1.insample, 1, 0))
+```
+
+
+##### Out-of-sample (performance on testing set)
+To do out-of-sample prediction you need to add the testing set as a second argument after the glm object. Remember to add type = "response", otherwise you will get the log odds and not the probability.
+
+```{r}
+prob.glm1.outsample <- predict(credit.glm1,credit.test,type="response")
+predicted.glm1.outsample <-  prob.glm1.outsample> 0.2
+predicted.glm1.outsample <- as.numeric(predicted.glm1.outsample)
+table(credit.test$Y, predicted.glm1.outsample, dnn=c("Truth","Predicted"))
+mean(ifelse(credit.test$Y != predicted.glm1.outsample, 1, 0))
+```
+It is the same as:
+```{r, eval=FALSE}
+glm1.outsample.logodds <- predict(credit.glm1,credit.test)
+predicted.glm1.outsample <- exp(glm1.outsample.logodds)/(1 + exp(glm1.outsample.logodds)) > 0.2
+predicted.glm1.outsample <- as.numeric(predicted.glm1.outsample)
+table(credit.test$Y, predicted.glm1.outsample, dnn=c("Truth","Predicted"))
+mean(ifelse(credit.test$Y != predicted.glm1.outsample, 1, 0))
+```
+It is usually the case that your out-of-sample prediction error rate is higher than in-sample error rate.
+
+
+#### ROC Curve
+To get the ROC curve you need to install the verification library.
+```{r, eval=FALSE}
+install.packages('verification')
+```
+To plot the ROC curve, the first argument of roc.plot is the vector with actual values "A binary observation (coded {0, 1 } )". The second argument is the vector with predicted probability. 
+```{r,results='hide', message=FALSE}
+library('verification')
+```
+
+```{r, eval=FALSE}
+roc.plot(credit.test$Y == '1', prob.glm1.outsample)
+```
+To get the area under the ROC curve:
+```{r, fig.width=4, fig.height=4}
+roc.plot(credit.test$Y == '1', prob.glm1.outsample)$roc.vol
+```
+
+We can also compare the glm0 and glm1 on the same graph:
+```{r}
+prob.glm0.outsample <- predict(credit.glm0,credit.test,type="response")
+roc.plot(x= credit.test$Y == '1', pred=cbind(prob.glm0.outsample,prob.glm1.outsample), legend=TRUE, leg.text=c("Full Model","X_3, X_8, and X_11_2"))$roc.vol
+```
+Another library [ROCR](http://rocr.bioinf.mpi-sb.mpg.de/) can also generate ROC curves for you.
+```{r, eval=FALSE}
+install.packages('ROCR')
+```
+```{r, message=FALSE, warning=FALSE}
+library(ROCR)
+pred <- prediction(prob.glm1.outsample, credit.test$Y)
+perf <- performance(pred, "tpr", "fpr")
+plot(perf, colorize=TRUE)
+```
+
+
+
+#### Search for optimal cut-off probability
+
+The following code does a grid search from pcut = 0.01 to pcut = 0.99 with the objective of minimizing overall cost in the training set. I am using an asymmetric cost function by assuming that giving out a bad loan cost 10 time as much as rejecting application from someone who can pay.
+
+```{r, fig.width=7}
+#define the searc grid from 0.01 to 0.99
+searchgrid = seq(0.01, 0.99, 0.01)
+#result is a 99x2 matrix, the 1st col stores the cut-off p, the 2nd column stores the cost
+result = cbind(searchgrid, NA)
+#in the cost function, both r and pi are vectors, r=truth, pi=predicted probability
+cost1 <- function(r, pi){
+  weight1 = 10
+  weight0 = 1
+  c1 = (r==1)&(pi<pcut) #logical vector - true if actual 1 but predict 0
+  c0 = (r==0)&(pi>pcut) #logical vecotr - true if actual 0 but predict 1
+  return(mean(weight1*c1+weight0*c0))
+}
+credit.glm1<-glm(Y~X3+X8+X11_2,family=binomial,credit.train); 
+for(i in 1:length(searchgrid))
+{
+  pcut <- result[i,1]
+  #assign the cost to the 2nd col
+  result[i,2] <- cost1(credit.train$Y, predict(credit.glm1,type="response"))
+}
+plot(result, ylab="Cost in Training Set")
+index.min<-which.min(result[,2])#find the index of minimum value
+result[index.min,2]
+```
+
+Alternatively, you can use the cross validation to choose the best cut-off probability.
+```{r, fig.width=7}
+searchgrid = seq(0.01, 0.6, 0.02)
+result = cbind(searchgrid, NA)
+cost1 <- function(r, pi){
+  weight1 = 10
+  weight0 = 1
+  c1 = (r==1)&(pi<pcut) #logical vector - true if actual 1 but predict 0
+  c0 = (r==0)&(pi>pcut) #logical vecotr - true if actual 0 but predict 1
+  return(mean(weight1*c1+weight0*c0))
+}
+credit.glm1<-glm(Y~X3+X8+X11_2,family=binomial,credit.train); 
+for(i in 1:length(searchgrid))
+{
+  pcut <- result[i,1]
+  result[i,2] <- cv.glm(data=credit.train,glmfit=credit.glm1,cost=cost1, K=3)$delta[2]
+}
+plot(result, ylab="CV Cost")
+index.min<-which.min(result[,2])#find the index of minimum value
+result[index.min,2]
+``` 
+
+[go to top](#content)
+
+****
+###  <a id="tree"></a> Tree Models
+We will illustrate fitting tree models using two alternative packages in R: [*rpart*](http://cran.r-project.org/web/packages/rpart/rpart.pdf) and [*tree*](http://cran.r-project.org/web/packages/tree/tree.pdf) package. 
+#### rpart package
+```{r}
+library(rpart)
+credit.rpart<-rpart(Y~ .-id, data=credit.train)
+credit.rpart
+plot(credit.rpart,compress=TRUE)
+text(credit.rpart, use.n=TRUE)
+```
+The tree splits on the variable *X8* first then *X11_2* next. 
+
+
+
+#### In-sample fit performance
+suppose we use the previous cut-off probability.
+```{r}
+pcut.rpart<- .08
+pred.prob <- predict(credit.rpart,data=credit.train) #default value is predicted probability
+credit.rpart.insample <- (pred.prob >pcut.rpart)*1
+table(credit.train$Y,credit.rpart.insample,dnn=c("Observation","Prediction"))
+```
+The default predicted value is predicted probability for each class (0 or 1). Using an arbitrary cut-off probability of 0.06, we can calculate the misclassification rate. You can conduct gride search as illustrated in section before.
+
+Misclassification rate can be calculated using
+```{r}
+mean(ifelse(credit.train$Y!=credit.rpart.insample,1,0))
+```
+Here we illustrate ROC curve using the **ROCR** package.
+```{r}
+library(ROCR)
+pred.rpart <- prediction(pred.prob,credit.train$Y)
+perf.rpart <- performance(pred.rpart,"tpr","fpr")
+plot(perf.rpart,colorize=TRUE,main="In-sample ROC Curve")
+```
+You can use the following to get the Area Under the Curve (AUC).
+```{r}
+auc.tmp <- performance(pred.rpart,"auc")
+AUC.rpart <- auc.tmp@y.values 
+AUC.rpart
+```
+#### Out-of-sample fit performance
+```{r}
+pcut.rpart<- .08
+pred.prob.outsample <- predict(credit.rpart,newdata=credit.test) #default value is predicted probability
+credit.rpart.outsample <- (pred.prob.outsample >pcut.rpart)*1
+table(credit.test$Y,credit.rpart.outsample,dnn=c("Observation","Prediction"))
+```
+Misclassification rate can be calculated using
+```{r}
+mean(ifelse(credit.test$Y!=credit.rpart.outsample,1,0))
+```
+Again we illustrate ROC curve using the **ROCR** package.
+```{r}
+library(ROCR)
+pred.rpart.outsample <- prediction(pred.prob.outsample,credit.test$Y)
+perf.rpart.outsample <- performance(pred.rpart.outsample,"tpr","fpr")
+plot(perf.rpart.outsample,colorize=TRUE,main="Out-of-Sample ROC Curve")
+
+auc.tmp.outsample <- performance(pred.rpart.outsample,"auc")
+AUC.rpart.outsample <- auc.tmp.outsample@y.values 
+AUC.rpart.outsample 
+```
+
+#### tree package
+The usuage of *tree* package is very similar to the *rpart* package.
+```{r}
+library(tree)
+library(maptree)
+
+credit.tree<-tree(Y~ .-id, data=credit.train)
+
+credit.tree
+
+draw.tree(credit.tree)
+```
+To find the optimal cut-off probability, you can conduct grid search as before.
+
+#### In-sample fit performance
+suppose we use the previous cut-off probability.
+```{r}
+#Y<-credit.test[,2]  
+pcut.tree<- .08
+pred.prob <- predict(credit.tree,data=credit.train) #default value is predicted probability
+credit.tree.insample <- (pred.prob >pcut.tree)*1
+table(credit.train$Y,credit.tree.insample,dnn=c("Observation","Prediction"))
+```
+Misclassification rate can be calculated using
+```{r}
+mean(ifelse(credit.train$Y!=credit.tree.insample,1,0))
+```
+Here we illustrate ROC curve using the **ROCR** package.
+```{r}
+library(ROCR)
+pred.tree <- prediction(pred.prob,credit.train$Y)
+perf.tree <- performance(pred.tree,"tpr","fpr")
+plot(perf.tree,colorize=TRUE,main="In-sample ROC Curve")
+```
+You can use the following to get the Area Under the Curve (AUC).
+```{r}
+auc.tmp <- performance(pred.tree,"auc")
+AUC.tree <- auc.tmp@y.values 
+AUC.tree
+```
+
+
+#### Out-of-sample fit performance
+```{r}
+pcut.tree<- .08
+pred.prob.outsample <- predict(credit.tree,newdata=credit.test) #default value is predicted probability
+credit.tree.outsample <- (pred.prob.outsample >pcut.tree)*1
+table(credit.test$Y,credit.tree.outsample,dnn=c("Observation","Prediction"))
+```
+Misclassification rate can be calculated using
+```{r}
+mean(ifelse(credit.test$Y!=credit.tree.outsample,1,0))
+```
+Again we illustrate ROC curve using the **ROCR** package.
+```{r}
+library(ROCR)
+pred.tree.outsample <- prediction(pred.prob.outsample,credit.test$Y)
+perf.tree.outsample <- performance(pred.tree.outsample,"tpr","fpr")
+plot(perf.tree.outsample,colorize=TRUE,main="Out-of-Sample ROC Curve")
+
+auc.tmp.outsample <- performance(pred.tree.outsample,"auc")
+AUC.tree.outsample <- auc.tmp.outsample@y.values 
+AUC.tree.outsample 
+```
+
+Some resources to build a better tree model:  
+*Item 1 [prune](http://cran.r-project.org/web/packages/maptree/maptree.pdf) tree (avoid overfitting the data and improve out-of-sample prediction):
+```{r, eval=FALSE}
+library(maptree)
+prune(credit.tree)
+```
+*Item 2 [Random Forests](http://cran.r-project.org/web/packages/randomForest/randomForest.pdf) Breiman and Cutler's random forest approach, which may improve predictive accuracy by generating large number of bootstrapped trees.
+```{r,eval=FALSE}
+library(randomForest)
+credit.data$Y <- as.factor(credit.data$Y) #without this step, you may get a warning message later, which may suggest you use regression tree
+fit <- randomForest(Y ~ .-id, family=binomial, data=credit.data) #full sample
+print(fit) # view results 
+importance(fit) # importance of each predictor
+```
+
+[go to top](#content)
+
+****
+### <a id="gam"></a> Generalized Additive Models (GAM)
+There are two common implementations of GAMs in R.  The older version (originally made for S-PLUS) is available as the 'gam' package by Hastie and Tibshirani.  The newer version that we will use below is the 'mgcv' package from Simon Wood.  The basic modeling procedure for both packages is similar (the function is gam for both; be wary of having both libraries loaded at the same time), but the behind-the-scenes computational approaches differ, as do the arguments for optimization and the model output.  Expect the results to be slightly different when used with the same model structure on the same dataset.
+```{r}
+library(mgcv)
+
+X<-credit.train[,3:63]
+X<-as.matrix(X)
+X2<- X[,1];   
+X3<- X[,2];
+X4<- X[,3];
+X5<- X[,4];
+X6<- X[,5];
+X7<- X[,6];
+X8<- X[,7];
+X9<- X[,8];
+Xcat <- X[,9:61];
+Y<-credit.train[,2]  
+
+credit.gam <- gam(Y~s(X5)+s(X2)+s(X3)+s(X4)+X6+X7+X8+X9+Xcat, family=binomial,data=credit.train);
+summary(credit.gam)
+```
+Model AIC/BIC and mean residual deviance
+```{r}
+AIC(credit.gam)
+BIC(credit.gam)
+credit.gam$deviance
+```
+
+```{r}
+credit.gam1 <- gam(Y ~ s(X3)+ X2+ X4+X5+X6+X7+X8+X9, family = binomial, data=credit.train)
+summary(credit.gam1)
+
+plot(credit.gam,shade=TRUE,,seWithMean=TRUE,scale=0)
+```
+#### In-sample fit performance
+```{r}
+pcut.gam <- .08
+prob.gam.in<-predict(credit.gam1,credit.train,type="response")
+pred.gam.in<-(prob.gam.in>=pcut.gam)*1
+table(credit.train$Y,pred.gam.in,dnn=c("Observation","Prediction"))
+
+```
+Misclassification rate is
+```{r}
+mean(ifelse(credit.train$Y != pred.gam.in, 1, 0))
+```
+Training model AIC and BIC
+```{r}
+AIC(credit.gam)
+BIC(credit.gam)
+AIC(credit.gam1)
+BIC(credit.gam1)
+```
+
+
+#### Search for optimal cut-off probability
+
+The following code does a grid search from pcut = 0.01 to pcut = 0.99 with the objective of minimizing overall cost in the training set. I am using an asymmetric cost function by assuming that giving out a bad loan cost 10 time as much as rejecting application from someone who can pay.
+
+```{r, fig.width=7}
+#define the searc grid from 0.01 to 0.20
+searchgrid = seq(0.01, 0.20, 0.01)
+#result.gam is a 99x2 matrix, the 1st col stores the cut-off p, the 2nd column stores the cost
+result.gam = cbind(searchgrid, NA)
+#in the cost function, both r and pi are vectors, r=truth, pi=predicted probability
+cost1 <- function(r, pi){
+  weight1 = 10
+  weight0 = 1
+  c1 = (r==1)&(pi<pcut) #logical vector - true if actual 1 but predict 0
+  c0 = (r==0)&(pi>pcut) #logical vecotr - true if actual 0 but predict 1
+  return(mean(weight1*c1+weight0*c0))
+}
+credit.gam<-gam(Y~s(X2)+s(X3)+s(X4)+s(X5)+X6+X7+X8+X9+X10_2+X11_2+X12_2+X13_2+X14_2+X15_2+X15_3+X15_4+X15_5
+ +X15_6+X16_2+X16_3+X16_4+X16_5+X16_6+X17_2+X17_3+X17_4+X17_5+X17_6+X18_2
+ +X18_3+X18_4+X18_5+X18_6+X18_7+X19_2+X19_3+X19_4+X19_5+X19_6+X19_7+X19_8
+ +X19_9+X19_10+X20_2+X20_3+X20_4+X21_2+X21_3+X22_2+X22_3+X22_4+X22_5+X22_6
+ +X22_7+X22_8+X22_9+X22_10+X22_11+X23_2+X23_3+X24_2,family=binomial,credit.train); #you may want to change the model when necessary; also on the safe side, explicitely write out the predictor variables
+for(i in 1:length(searchgrid))
+{
+  pcut <- result.gam[i,1]
+  #assign the cost to the 2nd col
+  result.gam[i,2] <- cost1(credit.train$Y, predict(credit.gam))
+}
+plot(result.gam, ylab="Cost in Training Set")
+index.min<-which.min(result.gam[,2])#find the index of minimum value
+result.gam[index.min,2] #min cost
+result.gam[index.min,1] #optimal cutoff probability
+```
+Model AIC/BIC
+```{r}
+AIC.gam <- AIC(credit.gam)
+BIC.gam <- BIC(credit.gam)
+```
+
+#### Out-of-sample fit performance
+```{r}
+pcut.gam <- result.gam[index.min,1]
+prob.gam.out<-predict(credit.gam,credit.test)
+pred.gam.out<-(prob.gam.out>=pcut.gam)*1
+table(credit.test$Y,pred.gam.out,dnn=c("Observation","Prediction"))
+```
+mis rate is
+```{r}
+mean(ifelse(credit.test$Y != pred.gam.out, 1, 0))
+```
+Cost associated with misclassification is
+```{r}
+cost1(credit.train$Y, predict(credit.gam))
+```
+
+[go to top](#content)
+
+****
+### <a id="da"></a> Discriminant Analysis
+Linear Discriminant Analysis (LDA) (in-sample and out-of-sample performance measure) is illustrated here. The following illustrate the usage of an arbitrary cut off probability.
+#### In-sample
+```{r}
+credit.lda <- lda(Y~.-id,data=credit.train)
+
+prob.lda.in <- predict(credit.lda,data=credit.train)
+pcut.lda <- .15
+pred.lda.in <- (prob.lda.in$posterior[,2]>=pcut.lda)*1
+table(credit.train$Y,pred.lda.in,dnn=c("Obs","Pred"))
+mean(ifelse(credit.train$Y != pred.lda.in, 1, 0))
+```
+
+#### Out-of-sample
+```{r}
+prob.lda.out <- predict(credit.lda,newdata=credit.test)
+pcut.lda <- .15
+pred.lda.out <- (prob.lda.out$posterior[,2]>=pcut.lda)*1
+table(credit.test$Y,pred.lda.out,dnn=c("Obs","Pred"))
+mean(ifelse(credit.test$Y != pred.lda.out, 1, 0))
+```
+[go to top](#content)
+
+****
+### <a id="nnet"></a> Neural Networks Models
+Neural Networks method (in-sample and out-of-sample performance measure) is illustrated here. The package [**nnet**](http://cran.r-project.org/web/packages/nnet/nnet.pdf) is used for this purpose.
+
+
+#### In-sample
+```{r}
+library(nnet)
+#x.train <- credit.train[,3:63]
+#y.train <- credit.train[,2]
+credit.nnet <- nnet(Y~.-id, data=credit.train, size=2)
+table(credit.train$Y,predict(credit.nnet,credit.train),dnn=c("Observation", "Prediction"))
+mean(ifelse(credit.train$Y != predict(credit.nnet,credit.train), 1, 0))
+```
+#### Out-of-sample
+```{r}
+table(credit.test$Y,predict(credit.nnet,credit.test),dnn=c("Observation", "Prediction"))
+mean(ifelse(credit.test$Y != predict(credit.nnet,credit.test), 1, 0))
+
+```
+[go to top](#content)
+
+### <a id="compare"></a> Performance Comparisons
+At last, after fitting several models, you may want to compare their in-sample and out-of-sample performances. The performance measures are illustrated in previous sections. In your report, you may want to put them in some table format. Note that not all measures are applicable. For example, I didn't find AIC/BIC or deviance for LDA models and Neural Network models. For tree models, *tree* package can give you mean residual deviance but not with *rpart* package. If you find either one of them, I would be interested to know.
+#### In-sample
+You may compare the following
+* AIC or BIC
+* Mean Residual Deviance (for binary response) or Mean Square Error (for continuous response)
+* Cost (asymmetric or symmetric)
+* Misclassification Rate
+* ROC curve or Area Under the Curve (AUC)
+
+#### Out-of-sample
+* Cost
+* ROC curve or Area Under the Curve (AUC)
+
+[go to top](#content)
+
+### <a id="german"></a> Starter code for German credit scoring
+Refer to http://archive.ics.uci.edu/ml/datasets/Statlog+(German+Credit+Data)) for variable description. Notice that "It is worse to class a customer as good when they are bad (5), than it is to class a customer as bad when they are good (1)." Define your cost function accordingly!
+```{r}
+library(caret) #this package contains the german data with its numeric format
+data(GermanCredit)
+```
+
+
+[go to top](#content)

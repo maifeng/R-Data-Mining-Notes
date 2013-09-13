@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Introduction to R</title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+</head>
+
+<body>
+<h1>Introduction to R</h1>
+
+<h2>Objective of this lab</h2>
+
+<ol>
+<li>Install R and RStudio</li>
+<li>Learn basic commands in R</li>
+<li>Get started with Rattle</li>
+</ol>
+
+<h2>Before You Start: Install R, RStudio</h2>
+
+<p><strong>R</strong></p>
+
+<p>Windows:
+<a href="http://cran.case.edu/bin/windows/base/R-3.0.1-win.exe">http://cran.case.edu/bin/windows/base/R-3.0.1-win.exe</a></p>
+
+<p>Mac OS X:
+<a href="http://cran.case.edu/bin/macosx/R-latest.pkg">http://cran.case.edu/bin/macosx/R-latest.pkg</a></p>
+
+<p><strong>RStudio</strong></p>
+
+<p><a href="http://www.rstudio.com/ide/download/desktop">http://www.rstudio.com/ide/download/desktop</a></p>
+
+<p>The download and installation should be straightforward, in case you encounter problems you can check the following video tutorials. </p>
+
+<p>Install R:
+<a href="http://www.youtube.com/watch?v=SJ9sVyqWJn8&amp;hd=1">http://www.youtube.com/watch?v=SJ9sVyqWJn8&amp;hd=1</a></p>
+
+<p>Install R Studio:
+<a href="http://www.youtube.com/watch?v=6aTRbo7kdGk&amp;hd=1">http://www.youtube.com/watch?v=6aTRbo7kdGk&amp;hd=1</a></p>
+
+<h2>Install Rattle</h2>
+
+<h3>Rattle: &ldquo;A Graphical User Interface for Data Mining using R&rdquo;.</h3>
+
+<p>With Rattle you can presents statistical and visual summaries of data, transforms data into forms that can be readily modelled, builds both unsupervised and supervised models from the data, presents the performance of models graphically, and scores new datasets.<a href="http://rattle.togaware.com/" title="Rattle Official Website">1</a></p>
+
+<p>Basically, <em>R</em> is a command line language, <em>RStudio</em> offers a pleasant development enviroment for you to write code and manage projects, and <em>Rattle</em> is a package in R that allows you to do Data Mining tasks in a graphical interface. </p>
+
+<p>To install Rattle, startup R and then run the following command:</p>
+
+<pre><code class="r">install.packages(&quot;rattle&quot;)
+</code></pre>
+
+<p>Alternatively, you can use the <em>Install Packages</em> in RStudio.</p>
+
+<h2>R Basics</h2>
+
+<h3>Assignment</h3>
+
+<p>You can assign numbers and lists of numbers (vector) to a variable.
+Assignment is specified with the &ldquo;&lt;-&rdquo; or &ldquo;=&rdquo; symbol. There are some subtle differences between them but most of the time they are equivalent. </p>
+
+<p>Here we define two variables \( x = 10 \) and \( y = 5 \), then we calculate the result of \( x+y \).</p>
+
+<pre><code class="r">x &lt;- 10
+y = 5
+x + y
+</code></pre>
+
+<pre><code>## [1] 15
+</code></pre>
+
+<p>To assign a list of numbers (vector) to a variable, the numbers within the c command are separated by commas. As an example, we can create a new variable, called &ldquo;z&rdquo; which will contain the numbers 3, 5, 7, and 9:</p>
+
+<pre><code class="r">z = c(3, 5, 7, 9)
+</code></pre>
+
+<p>In RStudio, you can view every variable you defined, along with other objects such as imported datasets in the <em>Workspace</em> panel.</p>
+
+<h3>Basic Calculation</h3>
+
+<p>You can use R as an over-qualified calculator. Try the following commands. You need to have \( x, y, z \) defined first.</p>
+
+<pre><code class="r">x + y
+</code></pre>
+
+<pre><code>## [1] 15
+</code></pre>
+
+<pre><code class="r">log(x)
+</code></pre>
+
+<pre><code>## [1] 2.303
+</code></pre>
+
+<pre><code class="r">exp(y)
+</code></pre>
+
+<pre><code>## [1] 148.4
+</code></pre>
+
+<pre><code class="r">cos(x)
+</code></pre>
+
+<pre><code>## [1] -0.8391
+</code></pre>
+
+<p>Logical operations:</p>
+
+<pre><code class="r">x == y
+</code></pre>
+
+<pre><code>## [1] FALSE
+</code></pre>
+
+<pre><code class="r">x &gt; y
+</code></pre>
+
+<pre><code>## [1] TRUE
+</code></pre>
+
+<p>Calculations on list of numbers, recall \( z = [3,5,7,9] \). 
+Note that you can put a # in front of a line to write comment in code.</p>
+
+<pre><code class="r"># Average
+mean(z)
+</code></pre>
+
+<pre><code>## [1] 6
+</code></pre>
+
+<pre><code class="r"># Standard devidation
+sd(z)
+</code></pre>
+
+<pre><code>## [1] 2.582
+</code></pre>
+
+<pre><code class="r"># Median
+median(z)
+</code></pre>
+
+<pre><code>## [1] 6
+</code></pre>
+
+<pre><code class="r"># Max
+max(z)
+</code></pre>
+
+<pre><code>## [1] 9
+</code></pre>
+
+<pre><code class="r"># Min
+min(z)
+</code></pre>
+
+<pre><code>## [1] 3
+</code></pre>
+
+<pre><code class="r"># Summary Stats
+summary(z)
+</code></pre>
+
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##     3.0     4.5     6.0     6.0     7.5     9.0
+</code></pre>
+
+<h3>Data Types in R: Vectors, matrices and data frames</h3>
+
+<ul>
+<li><p>Vector is a list of numbers (or strings), \( z \) is a vector with \( [3,5,7,9] \)</p></li>
+<li><p>Matrix is a table of numbers (or strings). \( A \) is a matrix with 2 rows and 3 columns. </p></li>
+<li><p>Data frames in R are the &ldquo;datasets&rdquo;&ldquo;, that is tables of data with each row as an observation, and each column representing a variable. Data frames have column names (variable names) and row names. In the example, the function <em>data.frame(A)</em> transforms the matrix \( A \) into a data frame. Most of the time you will import a text file as a data frame or use one of the example datasets that come with R.</p></li>
+</ul>
+
+<pre><code class="r">
+z = c(3, 5, 7, 9)
+
+A = matrix(c(1, 2, 3, 4, 5, 6), nrow = 2)
+
+df = data.frame(A)
+</code></pre>
+
+<p>Elementwise operations</p>
+
+<pre><code class="r">z
+</code></pre>
+
+<pre><code>## [1] 3 5 7 9
+</code></pre>
+
+<pre><code class="r">z/10
+</code></pre>
+
+<pre><code>## [1] 0.3 0.5 0.7 0.9
+</code></pre>
+
+<pre><code class="r">A
+</code></pre>
+
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    1    3    5
+## [2,]    2    4    6
+</code></pre>
+
+<pre><code class="r">A + 2
+</code></pre>
+
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    3    5    7
+## [2,]    4    6    8
+</code></pre>
+
+<pre><code class="r">df
+</code></pre>
+
+<pre><code>##   X1 X2 X3
+## 1  1  3  5
+## 2  2  4  6
+</code></pre>
+
+<pre><code class="r">df + 100
+</code></pre>
+
+<pre><code>##    X1  X2  X3
+## 1 101 103 105
+## 2 102 104 106
+</code></pre>
+
+<p>Subsetting, indexing</p>
+
+<pre><code class="r">length(z)
+</code></pre>
+
+<pre><code>## [1] 4
+</code></pre>
+
+<pre><code class="r">z[1:3]
+</code></pre>
+
+<pre><code>## [1] 3 5 7
+</code></pre>
+
+<pre><code class="r">z[-1]
+</code></pre>
+
+<pre><code>## [1] 5 7 9
+</code></pre>
+
+<pre><code class="r">A[2, 2]
+</code></pre>
+
+<pre><code>## [1] 4
+</code></pre>
+
+<pre><code class="r">A[1, ]
+</code></pre>
+
+<pre><code>## [1] 1 3 5
+</code></pre>
+
+<pre><code class="r">A[, 2:3]
+</code></pre>
+
+<pre><code>##      [,1] [,2]
+## [1,]    3    5
+## [2,]    4    6
+</code></pre>
+
+<p>Matrix Calculation</p>
+
+<pre><code class="r"># Dimensions of A
+dim(A)
+</code></pre>
+
+<pre><code>## [1] 2 3
+</code></pre>
+
+<pre><code class="r"># Transpose
+t(A)
+</code></pre>
+
+<pre><code>##      [,1] [,2]
+## [1,]    1    2
+## [2,]    3    4
+## [3,]    5    6
+</code></pre>
+
+<p>Data Frame</p>
+
+<p>df$var will select var from df</p>
+
+<p>In RStudio, hitting tab after <code>df$</code> allows you to select/autocomplete variable names in df  </p>
+
+<pre><code class="r"># Load cars dataset that comes with R (50 obs, 2 variables)
+data(cars)
+dim(cars)
+</code></pre>
+
+<pre><code>## [1] 50  2
+</code></pre>
+
+<pre><code class="r"># First 2 obs of the variable dist in cars data frame
+cars$dist[1:2]
+</code></pre>
+
+<pre><code>## [1]  2 10
+</code></pre>
+
+<p>You can use the <em>read.table</em> function to import comma delimited text files (csv files). An easier way is to use the Import Dataset Wizard in RStudio.</p>
+
+<pre><code class="r">mydata = read.table(&quot;c:/mydata.csv&quot;, header = TRUE, sep = &quot;,&quot;)
+</code></pre>
+
+<h3>Probability Distributions</h3>
+
+<p>Types of distributions: norm, binom, beta, cauchy, chisq, exp, f, gamma, geom, hyper, lnorm, logis, nbinom, t, unif, weibull, wilcox</p>
+
+<p>Four prefixes:</p>
+
+<ol>
+<li><p>&#39;d&#39; for density (PDF)</p></li>
+<li><p>&#39;p&#39; for distribution (CDF)</p></li>
+<li><p>&#39;q&#39; for quantile (percentiles)</p></li>
+<li><p>&#39;r&#39; for random generation (simulation)</p></li>
+</ol>
+
+<pre><code class="r">dbinom(x = 4, size = 10, prob = 0.5)
+</code></pre>
+
+<pre><code>## [1] 0.2051
+</code></pre>
+
+<pre><code class="r">pnorm(1.86)
+</code></pre>
+
+<pre><code>## [1] 0.9686
+</code></pre>
+
+<pre><code class="r">qnorm(0.975)
+</code></pre>
+
+<pre><code>## [1] 1.96
+</code></pre>
+
+<pre><code class="r">rnorm(10)
+</code></pre>
+
+<pre><code>##  [1]  0.08679  1.29106  0.17671 -0.47900  0.72107 -0.55402 -0.30856
+##  [8]  1.57968 -1.45791  1.72941
+</code></pre>
+
+<pre><code class="r">rnorm(n = 10, mean = 100, sd = 20)
+</code></pre>
+
+<pre><code>##  [1] 101.42  91.51 107.04  73.76 139.81 118.56 115.61 101.17  79.28 100.04
+</code></pre>
+
+<h3>Regression Models</h3>
+
+<pre><code class="r"># Load car dataset that comes with R
+data(cars)
+# fit a simple linear regression between braking distance and speed
+lm(dist ~ speed, data = cars)
+</code></pre>
+
+<pre><code>## 
+## Call:
+## lm(formula = dist ~ speed, data = cars)
+## 
+## Coefficients:
+## (Intercept)        speed  
+##      -17.58         3.93
+</code></pre>
+
+<h3>Basic Plotting</h3>
+
+<pre><code class="r">plot(cars)
+</code></pre>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-11"/> </p>
+
+<h3>Functions</h3>
+
+<ul>
+<li>Most of R consists of functions</li>
+<li>The arguments can either be input in the right order, or using argument names</li>
+<li>In RStudio, pressing tab after function name gives help about arguments</li>
+<li>You can define your own functions, in the following example the function <em>abs_val</em> returns the absolute value of a number.</li>
+</ul>
+
+<pre><code class="r">abs_val = function(x) {
+    if (x &gt;= 0) {
+        return(x)
+    } else {
+        return(-x)
+    }
+}
+</code></pre>
+
+<pre><code class="r">abs_val(-5)
+</code></pre>
+
+<pre><code>## [1] 5
+</code></pre>
+
+<h3>Organizing your computations</h3>
+
+<ol>
+<li>R has a &quot;current directory&rdquo; (Working Directory). To set Working Directory in RStudio: Session -&gt; Set Working Directory.</li>
+<li>Your objects (loaded datasets, variables, functions, etc.) are contained in your &ldquo;current workspace&rdquo;, which can be saved any time. In Rstudio: Session -&gt; Load Workspace/Save Workspace As.</li>
+<li>Keep it tidy! Keep separate projects (code, data files) in separate workspaces/directories.</li>
+</ol>
+
+<h3>Help</h3>
+
+<ol>
+<li>Use <em>help(mean)</em> or <em>?mean</em>  to find help documents for the function <em>mean</em>.</li>
+<li>In Rstudio, pressing tab after a function name gives help about the arguments</li>
+<li>A google search will probably answer most of your questions.</li>
+<li>Where to ask questions?
+
+<ul>
+<li>Stackoverflow: <a href="http://stackoverflow.com/questions/tagged/r">http://stackoverflow.com/questions/tagged/r</a></li>
+<li>R Help Mailing List: <a href="http://r.789695.n4.nabble.com/R-help-f789696.html">http://r.789695.n4.nabble.com/R-help-f789696.html</a></li>
+</ul></li>
+</ol>
+
+<h3>Starting Rattle</h3>
+
+<p>To start Rattle, first load the Rattle package (after you install it), and use <em>rattle()</em> command to launch it.</p>
+
+<pre><code class="r">library(rattle)
+rattle()
+</code></pre>
+
+<p>When using Rattle, it will ask you to install many packages along the way, you will have to keep hitting the Yes button.</p>
+
+<p>Note:
+Part of this handout is built upon Clarkson University&#39;s R Tutorial <a href="http://www.cyclismo.org/tutorial/R/">2</a> and Dr.Yan Yu&#39;s slides.</p>
+
+</body>
+
+</html>
+

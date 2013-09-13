@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<!-- saved from url=(0014)about:internet -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Tree Models</title>
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 12px;
+   margin: 8px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 { 
+   font-size:2.2em; 
+}
+
+h2 { 
+   font-size:1.8em; 
+}
+
+h3 { 
+   font-size:1.4em; 
+}
+
+h4 { 
+   font-size:1.0em; 
+}
+
+h5 { 
+   font-size:0.9em; 
+}
+
+h6 { 
+   font-size:0.8em; 
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre {	
+   margin-top: 0;
+   max-width: 95%;
+   border: 1px solid #ccc;
+   white-space: pre-wrap;
+}
+
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code.r, code.cpp {
+   background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * { 
+      background: transparent !important; 
+      color: black !important; 
+      filter:none !important; 
+      -ms-filter: none !important; 
+   }
+
+   body { 
+      font-size:12pt; 
+      max-width:100%; 
+   }
+       
+   a, a:visited { 
+      text-decoration: underline; 
+   }
+
+   hr { 
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote { 
+      padding-right: 1em; 
+      page-break-inside: avoid; 
+   }
+
+   tr, img { 
+      page-break-inside: avoid; 
+   }
+
+   img { 
+      max-width: 100% !important; 
+   }
+
+   @page :left { 
+      margin: 15mm 20mm 15mm 10mm; 
+   }
+     
+   @page :right { 
+      margin: 15mm 10mm 15mm 20mm; 
+   }
+
+   p, h2, h3 { 
+      orphans: 3; widows: 3; 
+   }
+
+   h2, h3 { 
+      page-break-after: avoid; 
+   }
+}
+
+</style>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: rgb(88, 72, 246)
+   }
+
+   pre .number {
+     color: rgb(0, 0, 205);
+   }
+
+   pre .comment {
+     color: rgb(76, 136, 107);
+   }
+
+   pre .keyword {
+     color: rgb(0, 0, 255);
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: rgb(3, 106, 7);
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://c328740.ssl.cf1.rackcdn.com/mathjax/2.0-latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+
+</head>
+
+<body>
+<h1>Tree Models</h1>
+
+<p>In this lab we will go through the model building, validation, and interpretation of tree models. The focus will be on <em>rpart</em> package.</p>
+
+<h2>Regression Tree vs. Classification Tree</h2>
+
+<p>CART stands for classification and regression tree. </p>
+
+<ul>
+<li>Regression tree: response variable Y is numerical</li>
+<li>Classification tree: response variable Y is categorical</li>
+</ul>
+
+<p>For the regression tree example, we will use the Boston Housing data. Recall the response variable is the housing price. For the classification tree example, we will use the credit scoring data. The response variable is whether the loan went to default.</p>
+
+<p>Note that unlkie logistic regreesion, the response variable does not have to be binary in case of classification tree. We can use classification tree on classification problems with more than 2 outcomes.</p>
+
+<p>Let us load the data sets. This time the training and test datasets are divided for you so we can get similar answers,</p>
+
+<pre><code class="r">boston.data = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/boston.csv&quot;)
+boston.train = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/boston.train.csv&quot;)
+boston.test = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/boston.test.csv&quot;)
+
+credit.data = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/credit0.csv&quot;)
+credit.train = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/credit.train.csv&quot;)
+credit.test = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/credit.test.csv&quot;)
+</code></pre>
+
+<p>We will use the &#39;rpart&#39; library.</p>
+
+<pre><code class="r">install.packages(&quot;rpart&quot;)
+</code></pre>
+
+<pre><code class="r">library(rpart)
+</code></pre>
+
+<h2>Fitting Models and Prediction</h2>
+
+<h3>Fitting regression tree</h3>
+
+<p>The simple form of the <em>rpart</em> function is similar to <em>lm</em> and <em>glm</em>. It takes a formula argument in which you specify the response and predictor variables, and a data argument in which you specify the data frame.</p>
+
+<pre><code class="r">boston.rpart &lt;- rpart(formula = medv ~ ., data = boston.train)
+</code></pre>
+
+<h4>Printing and ploting the tree</h4>
+
+<pre><code class="r">boston.rpart
+</code></pre>
+
+<pre><code>## n= 455 
+## 
+## node), split, n, deviance, yval
+##       * denotes terminal node
+## 
+##  1) root 455 39645.6100 22.60835  
+##    2) rm&lt; 6.9715 390 16846.5000 20.04077  
+##      4) lstat&gt;=14.4 160  3066.1440 14.88313  
+##        8) crim&gt;=6.99237 70  1025.6890 12.02429 *
+##        9) crim&lt; 6.99237 90  1023.3760 17.10667 *
+##      5) lstat&lt; 14.4 230  6563.3110 23.62870  
+##       10) lstat&gt;=4.91 209  4036.4450 22.78373  
+##         20) lstat&gt;=9.95 94   631.5261 20.71596 *
+##         21) lstat&lt; 9.95 115  2674.4820 24.47391  
+##           42) age&lt; 89.45 107  1225.9660 23.85327 *
+##           43) age&gt;=89.45 8   856.0350 32.77500 *
+##       11) lstat&lt; 4.91 21   892.5695 32.03810 *
+##    3) rm&gt;=6.9715 65  4801.6380 38.01385  
+##      6) rm&lt; 7.437 36  1224.8090 32.44444 *
+##      7) rm&gt;=7.437 29  1073.9780 44.92759 *
+</code></pre>
+
+<pre><code class="r">plot(boston.rpart)
+text(boston.rpart)
+</code></pre>
+
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfgAAAH4CAMAAACR9g9NAAAAkFBMVEX9/v0AAAAAADkAAGUAOWUAOY8AZo8AZrUoAAAoAGU5AAA5ADk5AGU5OWU5OY85j7U5j9pXAGVlAABlADllAGVlOQBlOTllOWZlOY9ltf2POQCPOTmPOWWPZgCPj2WPtY+P29qP2/21ZgC1tWW124+1/tq1/v3ajzna24/a/v39tWX924/9/oH9/rX9/tr9/v0Z/+T/AAAAMHRSTlP//////////////////////////////////////////////////////////////wBipdB4AAAACXBIWXMAAAsSAAALEgHS3X78AAAPj0lEQVR4nO3dC3vixhWA4cjO1q2z2bh7aWu7ydYkwV1cm///76q5SDpg7wwchODofN/zbKzgCwMvkgBL4x/W5LIfTj0AOk3AOw14pwHvNOCdBrzTgHca8E4D3mnAOw14pwHvNOCdBrzTgHca8E4D3mnAOw14pwHvNOCdBrzTgHca8E4D3mnAOw14pwHvNOCdBrzTgHca8E4D3mnAOw14pwHvNOCdBrzTgHca8E4D3mnAOw14pwHvNOCdBrzTgHca8E4D3mnAOw14pwHvNOCdBrzTgHca8E4D3mnAOw14pwHvNOCdBryql7vm4iEuPV03l8v1YxO6Df//fnnaoe0Y8KoWt+vVu2/twvPH2/VjXEoXrMLDwELAF3r6+cvln/e/Nc3Nqv2XLroOq/Xz50736cO39fOnsPLH/y4uvrLG2y8ov9xdtR+v4ia83cCnlfvpw695Uz/AP16l7wHefhH7/iH+a3VXebeeHhGBPG/qw+VJH/hZtAUv1/huPQ9P7n5pP513+cDPom34db+P/+ffl90qnvf4i5vheywEfKE34HOLvy3zpr69OOzdw5f032Mh4At9H/5/fw0v28Ln2+f7YSPffxr4WTe8nrPaDOAbT412r80B/gTXeao1HngR8JqAVwX8GQS8JuBVAX8GAa8JeFMBLwJeE/CmAl4EvCbgTQW8CHhNwJsKeBHwmoA3FfAi4DUBbyrgRcBrAt5UwIuA1wS8qYAXAa8JeFMBLwJeE/CmAl4EvCbgTQW8CHhNwJsKeBHwmoA3FfAi4DUBbyrgRcBrAt5UwIuA1wS8qYAXAa8JeFMBLwJeE/CmAl4EvCbgTQW8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" alt="plot of chunk unnamed-chunk-6"/> </p>
+
+<h4>Prediction using regression tree</h4>
+
+<p>The in-sample and out-of-sample prediction for regression tree is also similar to <em>lm</em> and <em>glm</em> models.</p>
+
+<p>In-sample prediction</p>
+
+<pre><code class="r">boston.train.pred.tree = predict(boston.rpart)
+</code></pre>
+
+<p>Out-of-sample prediction</p>
+
+<pre><code class="r">boston.test.pred.tree = predict(boston.rpart, boston.test)
+</code></pre>
+
+<p>The mean squred error loss for this tree model is</p>
+
+<pre><code class="r">mean((boston.test.pred.tree - boston.test$medv)^2)
+</code></pre>
+
+<pre><code>## [1] 14.35141
+</code></pre>
+
+<p>We can compare this model&#39;s out-of-sample performance with the linear regression model with all variables in it.</p>
+
+<pre><code class="r">boston.reg = lm(medv ~ ., data = boston.train)
+boston.test.pred.reg = predict(boston.reg, boston.test)
+mean((boston.test.pred.reg - boston.test$medv)^2)
+</code></pre>
+
+<pre><code>## [1] 18.88389
+</code></pre>
+
+<h3>Fitting classification tree (when you know the cost function)</h3>
+
+<p>The classification tree is slightly more complicated to specify. What makes it more complicated is that we often have asymmetric cost function. In the credit scoring case it means that false negatives (predicting 0 when truth is 1, or giving out loans that end up in default) will cost more than false positives (predicting 1 when truth is 0, rejecting loans that you should not reject).</p>
+
+<p>Here we make the assumption that false negative cost 10 times of false positive. In real life the cost structure should be carefully researched.</p>
+
+<pre><code class="r">credit.rpart &lt;- rpart(formula = Y ~ . - id, data = credit.train, method = &quot;class&quot;, 
+    parms = list(loss = matrix(c(0, 10, 1, 0), nrow = 2)))
+</code></pre>
+
+<p>Note the following important differences from the regression tree:</p>
+
+<ul>
+<li><p>The method = &ldquo;class&rdquo; is required if the response is not declared as factors.</p></li>
+<li><p>The parms argument, which is a list. The most import element is the loss matrix. The diagonal elements are 0, and off-diagonal elements tells you the loss(cost) of classifying something wrong. For binary classification, the numbers in c() specify the cost in this sequence: c(0, False Negative, False Positive, 0).
+If you have symmetric cost, you can ignore the parms argument.</p></li>
+</ul>
+
+<p>For more advanced controls, you should carefully read the help document for the rpart function.</p>
+
+<h4>Printing and ploting the tree</h4>
+
+<pre><code class="r">credit.rpart
+</code></pre>
+
+<pre><code>## n= 4500 
+## 
+## node), split, n, loss, yval, (yprob)
+##       * denotes terminal node
+## 
+##   1) root 4500 2760 0 (0.93866667 0.06133333)  
+##     2) X9&gt;=-0.2105 898    0 0 (1.00000000 0.00000000) *
+##     3) X9&lt; -0.2105 3602 2760 0 (0.92337590 0.07662410)  
+##       6) X8&gt;=0.076 870  180 0 (0.97931034 0.02068966) *
+##       7) X8&lt; 0.076 2732 2474 1 (0.90556369 0.09443631)  
+##        14) X11_2&gt;=0.5 2270 1730 0 (0.92378855 0.07621145)  
+##          28) X17_6&gt;=0.5 1350  750 0 (0.94444444 0.05555556)  
+##            56) X7&gt;=-0.266 698  240 0 (0.96561605 0.03438395) *
+##            57) X7&lt; -0.266 652  510 0 (0.92177914 0.07822086)  
+##             114) X21_3&lt; 0.5 211   90 0 (0.95734597 0.04265403) *
+##             115) X21_3&gt;=0.5 441  399 1 (0.90476190 0.09523810)  
+##               230) X3&gt;=-0.7475 276  180 0 (0.93478261 0.06521739) *
+##               231) X3&lt; -0.7475 165  141 1 (0.85454545 0.14545455) *
+##          29) X17_6&lt; 0.5 920  822 1 (0.89347826 0.10652174)  
+##            58) X21_3&lt; 0.5 389  240 0 (0.93830334 0.06169666)  
+##             116) X17_3&gt;=0.5 148   20 0 (0.98648649 0.01351351) *
+##             117) X17_3&lt; 0.5 241  219 1 (0.90871369 0.09128631)  
+##               234) X3&gt;=-0.7475 179   90 0 (0.94972067 0.05027933) *
+##               235) X3&lt; -0.7475 62   49 1 (0.79032258 0.20967742) *
+##            59) X21_3&gt;=0.5 531  457 1 (0.86064030 0.13935970)  
+##             118) X3&gt;=0.134 162  110 0 (0.93209877 0.06790123) *
+##             119) X3&lt; 0.134 369  306 1 (0.82926829 0.17073171) *
+##        15) X11_2&lt; 0.5 462  377 1 (0.81601732 0.18398268) *
+</code></pre>
+
+<pre><code class="r">plot(credit.rpart)
+text(credit.rpart)
+</code></pre>
+
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfgAAAH4CAMAAACR9g9NAAAAgVBMVEX9/v0AAAAAADkAAGUAOY8AZrUXAFcoAAA5AAA5ADk5AGU5OWU5OY85j7U5j9pIAGVlAABlADllAEhlAGVlOQBlOY9lZmVltf2POQCPOTmPOWWPZgCPtY+P29qP2/21ZgC1jzm1/v3ajzna/tra/v39tWX924/9/oH9/rX9/tr9/v24PtalAAAAK3RSTlP///////////////////////////////////////////////////////8AI8mn0AAAAAlwSFlzAAALEgAACxIB0t1+/AAAD55JREFUeJztnWtj4jYaRus0szvtZrPTnW1J2tnQpAML/v8/cC3Jso25GSPLLzznfAgJyETSQRKybj+UIMkPc0cA5gHxoiBeFMSLgnhREC8K4kVBvCiIFwXxoiBeFMSLgnhREC8K4kVBvCiIFwXxoiBeFMSLgnhREC8K4kVBvCiIFwXxoiBeFMSLgnhREC8K4kVBvCiIFwXxoiBeFMSLgnhREC8K4kVBvCiIFwXxoiBeFMSLgnhREC8K4kVBvCiIFwXxoiBeFMSLgnhREC8K4kVBvCiIFwXxoiBeFMSLgnhRZhP/8fi9LJfP5fpz8eP7oQCbL4ULUlEFKRb+l5/fm+c/iuLIhTCE+Ur8clGun75vvizCZ6DP9qV64ZP7bfPLW7n+6a0sV850fH65yB3h+2I+8eunv17fnHtndvXw1nt58/U9lPBy5fRXnpcP36q/6+e3r/0L4CJmbOM/fnsuo/iqILsKfFU4QrVevxAIv7kPQv18VeHXAWEUM4pff164FruquUNx9383rB474rcvzz5EJb5+3tX9lPormE/89vVbVXjdN7d/vsYSX7Msik/dEr/54r13S3wIR5EfzXziq6Z7GXxWzXbdxneq+s2///Ue2vi2Kli3bbz/G/HjmU18LdAV3vDlvcf25W/v4YW2CXDCXa1fPe9q/O3vdOdGM5f40GpXHbmqkB/qzZXl//7uXqhcfzTVQK8fv9cTgOHYvXPnqgSYjITiC/OkS+vtk1J8urdypC/xiO+AeFEQL8p9iT855Ldp+g+hYxB7C9sXxf7BfYmPQ37u5kC/k1j5re8YtAN//nZAdc3qcI/ynrkz8Z0hv+Z2YPN+RX3Lr7355z4hot1Gu+LH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" alt="plot of chunk unnamed-chunk-12"/> </p>
+
+<h4>Prediction using classification tree</h4>
+
+<p>For a binary classification problem, as you learned in logistic regression there are 2 types of predictions. One is the predicted class of response (0 or 1), and the second type is the probability of response being 1. We use an additional argument type=&ldquo;class&rdquo; or type=&ldquo;prob&rdquo; to get these:</p>
+
+<p>In-sample prediction (skipped)</p>
+
+<p>Out-of-sample prediction</p>
+
+<pre><code class="r"># Predicted Class
+credit.test.pred.tree1 = predict(credit.rpart, credit.test, type = &quot;class&quot;)
+table(credit.test$Y, credit.test.pred.tree1, dnn = c(&quot;Truth&quot;, &quot;Predicted&quot;))
+</code></pre>
+
+<pre><code>##      Predicted
+## Truth   0   1
+##     0 376 100
+##     1   8  16
+</code></pre>
+
+<p>Usually if you want a hassle-free model, using type=&ldquo;class&rdquo; is enough <strong>given that you specified the loss matrix correctly in rpart</strong>.</p>
+
+<p>We can get the expected loss for this tree model by defining a cost function that has the correct weights:</p>
+
+<pre><code class="r">
+cost &lt;- function(r, pi) {
+    weight1 = 10
+    weight0 = 1
+    c1 = (r == 1) &amp; (pi == 0)  #logical vector - true if actual 1 but predict 0
+    c0 = (r == 0) &amp; (pi == 1)  #logical vecotr - true if actual 0 but predict 1
+    return(mean(weight1 * c1 + weight0 * c0))
+}
+cost(credit.test$Y, credit.test.pred.tree1)
+</code></pre>
+
+<pre><code>## [1] 0.36
+</code></pre>
+
+<p>We can compare this model&#39;s out-of-sample performance with the logistic regression model with all variables in it. Recall that when we search for the optimal cut-off using the same cost function we get optimal cut-off at about 0.08.</p>
+
+<pre><code class="r"># Fit logistic regression model
+credit.glm = glm(Y ~ . - id, data = credit.train, family = binomial)
+# Get binary prediction
+credit.test.pred.glm = as.numeric(predict(credit.glm, credit.test, type = &quot;response&quot;) &gt; 
+    0.08)
+# Calculate cost using test set
+cost(credit.test$Y, credit.test.pred.glm)
+</code></pre>
+
+<pre><code>## [1] 0.378
+</code></pre>
+
+<pre><code class="r"># Confusion matrix
+table(credit.test$Y, credit.test.pred.glm, dnn = c(&quot;Truth&quot;, &quot;Predicted&quot;))
+</code></pre>
+
+<pre><code>##      Predicted
+## Truth   0   1
+##     0 367 109
+##     1   8  16
+</code></pre>
+
+<p>Which model do you think is better?</p>
+
+<h2>ROC Curve and Cut-off Probability for Classification Tree</h2>
+
+<p>Recall that ROC Curve gives you the trade-off between hit rate (1 - false positive) and false negative, and area under the curve (AUC) can be used as a measure of how good the binary classification model performs when you do not know the cost function.</p>
+
+<p>To get ROC curve, we first fit a tree without the loss matrix, then get the predicted probability of Y being 1. The additional cp parameter controls the complexity of tree. Here we change it from its default 0.01 to a smaller value to grow a more complex tree than just the root node (if you use the default the tree you get will tell you to clasify everything as 0). More discussion on this in the next section. </p>
+
+<pre><code class="r">credit.rpart2 &lt;- rpart(formula = Y ~ . - id - X9, data = credit.train, method = &quot;class&quot;, 
+    cp = 5e-04)
+# Probability of getting 1
+credit.test.prob.rpart2 = predict(credit.rpart2, credit.test, type = &quot;prob&quot;)
+</code></pre>
+
+<p>credit.test.prob.rpart2 has 2 columns, the first one is prob(Y) = 0 and the second prob(Y) = 1. We only need the second column because they add to 1 for binary classification.</p>
+
+<p>To get ROC curve we use </p>
+
+<pre><code class="r">install.packages(&quot;ROCR&quot;)
+</code></pre>
+
+<pre><code class="r">library(ROCR)
+</code></pre>
+
+<pre><code class="r">pred = prediction(credit.test.prob.rpart2[, 2], credit.test$Y)
+perf = performance(pred, &quot;tpr&quot;, &quot;fpr&quot;)
+plot(perf, colorize = TRUE)
+</code></pre>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-19"/> </p>
+
+<p>Area under the curve is given by (do not worry about the syntax here):</p>
+
+<pre><code class="r">slot(performance(pred, &quot;auc&quot;), &quot;y.values&quot;)[[1]]
+</code></pre>
+
+<pre><code>## [1] 0.6903449
+</code></pre>
+
+<p>For a given cut-off probability, the 0/1 prediction result can be calculated similar to what you do in logistic regression</p>
+
+<pre><code class="r">credit.test.pred.rpart2 = as.numeric(credit.test.prob.rpart2[, 2] &gt; 0.1)
+table(credit.test$Y, credit.test.pred.rpart2, dnn = c(&quot;Truth&quot;, &quot;Predicted&quot;))
+</code></pre>
+
+<pre><code>##      Predicted
+## Truth   0   1
+##     0 432  44
+##     1  14  10
+</code></pre>
+
+<p>If you know the cost structure of mis-classification, there is usually no need to search for an optimal cut-off probability as we did in the logistic regression. You can refer to the last section on specifying a loss matrix, rpart will automatically generate decision rules with your cost structure taken into consideration.</p>
+
+<h4>Cumulative Gains Chart</h4>
+
+<p>Cumulative Gains Chart is useful for certain types of binary classification problem. For example a direct marketing campaign, a cumulative gain chart answers the following question according to your model: what is the percentage of customers you need to contact in order to get the certain percentages of customers who will buy the product?</p>
+
+<p>Using the Portuguese banking direct marketing dataset as example:</p>
+
+<pre><code class="r">bank.train = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/bank_train.csv&quot;)
+bank.test = read.csv(&quot;http://homepages.uc.edu/~maifg/7040/bank_test.csv&quot;)
+bank.pred.prob = predict(rpart(y ~ ., bank.train), bank.test)
+plot(performance(prediction(bank.pred.prob, bank.test$y), &quot;tpr&quot;, &quot;rpp&quot;))
+</code></pre>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-22"/> </p>
+
+<p>The above graph tells you that using the predictive model, we only need to call about 40% of the customers (the 40% customers with the highest predicted probability) to get the 80% of the subscription.</p>
+
+<h2>Pruning</h2>
+
+<p>In rpart(), the cp(complexity parameter) argument is one of the parameters that are used to control the compexity of the tree. The help document for rpart tells you &ldquo;Any split that does not decrease the overall lack of fit by a factor of cp is not attempted&rdquo;. For a regression tree, the overall Rsquare must increase by cp at each step. Basically, the smaller the cp value, the larger (complex) tree rpart will attempt to fit.  The default value for cp is 0.01.</p>
+
+<p>What happens when you have a large tree? The following tree has 27 splits.  </p>
+
+<pre><code class="r">boston.largetree &lt;- rpart(formula = medv ~ ., data = boston.train, cp = 0.001)
+</code></pre>
+
+<p>Try plot it yourself to see its structure.</p>
+
+<pre><code class="r">plot(boston.largetree)
+</code></pre>
+
+<p>The plotcp() function gives the relationship between 10-fold cross-validation error in the training set and size of tree.</p>
+
+<pre><code class="r">plotcp(boston.largetree)
+</code></pre>
+
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfgAAAH4CAMAAACR9g9NAAAAhFBMVEX9/v0AAAAAADkAAGUAOTkAOY8AZrU5AAA5ADk5AGU5OWU5OY85j7U5j9plAABlADllAGVlOQBlOY9lZjlltf2POQCPOTmPOWWPZgCPjzmPtY+P29qP2/21ZgC124+1/rW1/tq1/v3ajzna24/a/rXa/v39tWX924/929r9/rX9/tr9/v2pSlf4AAAALHRSTlP/////////////////////////////////////////////////////////AMfWCYwAAAAJcEhZcwAACxIAAAsSAdLdfvwAABBnSURBVHic7Z2LYtu2AUXLpLGbZlLazU62zm4WrZFm6f//b3xALxIAQREkQN1z1kyiQRCQDl6kCOKnA0jyU+oMQBoQLwriRVEUv/v43R6wfy5WnuC7QlG8k0Y54u+PbVG8/16ZfS2K4uHwtq42K+p35f+9e6nf/vnr7/VmFXre6a6QEv/22/fD5qGp0vsvL4fXVbVZUb7bfvhxqvG7x6fDMfS8012hJf7zS/VS+92s6s2qLDQlotw6i//4/Rh63um+kBJ/2D1WjXmldffpR9WIF9V2UxTKJuBafBN63um+0BJf0rToVUN/UZGtNb4JvcfaXiElvpRuxJcN/eHYs5/fXYk/hp53uiukxB9ezaj+W9V+F6tmGF/RDN0b8fvn939+bIbzVeh5p7tCSzycQLwoiBcF8aIgXhTEi4J4URAvCuJFQbwoiBcF8aIgXhTEi4J4URAvCuJFQbwoiBcF8aLEE++ZctbMXHKxKTzBVWBRPLnSfPQc2GTInq/6r858NVMuHPmqAt3ZqqPa81X+tYlizZIJtefJBDqyZEK930abaOK37kTrb8o9C+nVpfV0aNfdzW/rp8PGFWgyZM/X9nhTrTVfTRxHvk4HtGarDrXnq5qTs/vlxZElE2rP0zGqPUsmtHpxfhsdYol/ffeHd5Kpuz2o5zb4MBOfbAetpsM4Qk2G7Pk6/9WWrybUka9TVGvCTag9X9vKZ6nOnqVjqDVPJtCRJRNapxo8/WOWpr7EXePrOUq+Su+O6hMf0tQ7D36aQuVszJ3Z2jnFVzR/dX1VJo79yGWg56uqQpPUeL/43aN7TkLVhPlqvdts06Q6jxwg3pWv2p4rX01UV7aaMuPI1/55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" alt="plot of chunk unnamed-chunk-25"/> </p>
+
+<p>You can observe from the above graph that the cross-validation error (x-val) does not always go down when the tree becomes more complex. The analogy is when you add more variables in a regression model, its ability to predict future observations not necessarily increases. In the Boston housing example, you may conclude that having a tree mode with more than 7-9 splits is not helptul.</p>
+
+<p>To look at the error vs size of tree more carefully, you can look at the following table:</p>
+
+<pre><code class="r">printcp(boston.largetree)
+</code></pre>
+
+<pre><code>## 
+## Regression tree:
+## rpart(formula = medv ~ ., data = boston.train, cp = 0.001)
+## 
+## Variables actually used in tree construction:
+## [1] age     black   crim    dis     lstat   nox     ptratio rm     
+## 
+## Root node error: 39646/455 = 87.133
+## 
+## n= 455 
+## 
+##           CP nsplit rel error  xerror     xstd
+## 1  0.4539587      0   1.00000 1.00380 0.086139
+## 2  0.1820390      1   0.54604 0.59716 0.057973
+## 3  0.0631306      2   0.36400 0.39223 0.043594
+## 4  0.0412226      3   0.30087 0.34614 0.042386
+## 5  0.0256543      4   0.25965 0.30798 0.042494
+## 6  0.0184242      5   0.23399 0.28578 0.040106
+## 7  0.0149444      6   0.21557 0.27626 0.040267
+## 8  0.0093167      7   0.20063 0.26576 0.037323
+## 9  0.0084961      8   0.19131 0.26120 0.037280
+## 10 0.0077094      9   0.18281 0.25677 0.036646
+## 11 0.0059561     10   0.17510 0.25760 0.038310
+## 12 0.0058029     11   0.16915 0.25450 0.038304
+## 13 0.0053250     12   0.16335 0.25449 0.038306
+## 14 0.0047307     13   0.15802 0.24945 0.038019
+## 15 0.0038404     14   0.15329 0.24160 0.037486
+## 16 0.0036881     15   0.14945 0.23216 0.036390
+## 17 0.0018204     16   0.14576 0.22781 0.036879
+## 18 0.0016824     17   0.14394 0.22271 0.034808
+## 19 0.0015845     18   0.14226 0.22312 0.035051
+## 20 0.0014488     19   0.14067 0.22293 0.035046
+## 21 0.0013930     20   0.13922 0.22108 0.035060
+## 22 0.0013722     21   0.13783 0.22143 0.035055
+## 23 0.0012861     22   0.13646 0.22142 0.035053
+## 24 0.0011904     23   0.13517 0.22225 0.035028
+## 25 0.0010880     24   0.13398 0.22210 0.035033
+## 26 0.0010232     25   0.13290 0.22238 0.035039
+## 27 0.0010000     27   0.13085 0.22307 0.035040
+</code></pre>
+
+<p>Root node error is the error when you do not do anything too smart in prediction, in regression case, it is the mean squared error(MSE) if you use the average of medv as the prediction. Note it is the same as</p>
+
+<pre><code class="r">sum((boston.train$medv - mean(boston.train$medv))^2)/455
+</code></pre>
+
+<pre><code>## [1] 87.1332
+</code></pre>
+
+<p>The first 2 columns CP and nsplit tells you how large the tree is. rel.error \( \times \) root node error gives you the in sample error. For example, The last row 0.13085*87.133 = 11.40135, which is the same as the in-sample MSE if you calculate using predict:</p>
+
+<pre><code class="r">mean((predict(boston.largetree) - boston.train$medv)^2)
+</code></pre>
+
+<pre><code>## [1] 11.40127
+</code></pre>
+
+<p>xerror gives you the cross-validation (default is 10-fold) error. You can see that the rel error (in-sample error) is always decreasing as model is more complex, while the cross-validation error (measure of performance on future observations) is not. That is why we <strong>prune</strong> the tree to avoid overfitting the training data.</p>
+
+<p>The way rpart() does it is that it uses some default control parameters to avoid fitting a large tree. The main reason for this approach is to save computation time. For example by default rpart set a cp = 0.1 and the minimum number of observations that must exist in a node to be 20. Use ?rpart.control to view these parameters. Sometimes we wish to change these paramters to see how more complex trees will perform, as we did above. If we have a larger than necessary tree, we can use prune() function and specify a new cp:</p>
+
+<pre><code class="r">prune(boston.largetree, cp = 0.05)
+</code></pre>
+
+<pre><code>## n= 455 
+## 
+## node), split, n, deviance, yval
+##       * denotes terminal node
+## 
+## 1) root 455 39645.610 22.60835  
+##   2) rm&lt; 6.9715 390 16846.500 20.04077  
+##     4) lstat&gt;=14.4 160  3066.144 14.88313 *
+##     5) lstat&lt; 14.4 230  6563.311 23.62870 *
+##   3) rm&gt;=6.9715 65  4801.638 38.01385  
+##     6) rm&lt; 7.437 36  1224.809 32.44444 *
+##     7) rm&gt;=7.437 29  1073.978 44.92759 *
+</code></pre>
+
+<p>Some software/packages can automatically prune the tree.</p>
+
+</body>
+
+</html>
+

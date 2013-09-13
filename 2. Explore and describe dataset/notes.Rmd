@@ -1,0 +1,198 @@
+Explore Iris Dataset
+========================================================
+
+Objective of this lab
+------------
+1. Install Rattle
+2. Exploration and basic visualization using R/Rattle
+3. Start with Case #1
+
+Iris dataset - Introduction
+--------------
+The dataset consists of 50 samples from each of three species of Iris flowers (Iris setosa, Iris virginicaand Iris versicolor). Four features(variables) were measured from each sample, they are the **length** and the **width** of sepal and petal, in centimeters. It is introduced by Sir Ronald Fisher in 1936.
+
+### 3 Species
+![](pic/flower.png)
+
+### Flower Parts
+![](pic/parts.png)
+
+Explore the *iris* Dataset with R
+------------------------------------
+
+### Load Data
+The *iris* flower data set is included in R. It is a data frame with 150 cases (rows) and 5 variables (columns) named Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, and Species.
+
+ First, load iris data to the current workspace
+ 
+```{r}
+data(iris)
+```
+
+### What is in the dataset?
+Check dimensionality, the dataset has 150 rows(observations) and 5 columns (variables)
+```{r dim}
+dim(iris)
+```
+
+Another way to get the dim is to use ncol or nrow:
+```{r}
+ncol(iris)
+nrow(iris)
+```
+
+
+ Variable names or column names
+```{r varname}
+names(iris)
+```
+
+You can also use this command
+```{r, eval=FALSE}
+colnames(iris)
+```
+
+
+ Structure of the dataframe, note that the difference between *num* and *Factor*
+```{r struc}
+str(iris)
+```
+
+### Subsetting the dataset I: Numerical Index and Variable Names
+ Get the first 5 rows/obs
+```{r first5}
+iris[1:5,]
+```
+
+ Get Sepal.Length of the first 10 rows
+```{r}
+iris[1:10, "Sepal.Length"]
+```
+or alternatively
+```{r }
+iris$Sepal.Length[1:10]
+```
+or you can use the column index instead of variable names. Since Sepal.Length is the first column:
+```{r}
+iris[1:10, 1]
+```
+
+### Subsetting the dataset II: Logical Conditions
+There are 3 ways to get subset of data that satisfy certain logical conditions. These kind of operations are called filtering in Excel. Knowing any one of these well is enough. Do not worry about memorizing the syntax, you can always look them up.
+
+Suppose we want to get the **subset of data that has Sepal.Length > 5 and Sepal.Width > 4**.
+
+#### Use subset function
+```{r, eval=FALSE}
+subset(x = iris, subset = Sepal.Length > 5 & Sepal.Width > 4)
+```
+You can omit the x = and sebset = part
+```{r eval=FALSE}
+subset(iris, Sepal.Length > 5 & Sepal.Width > 4)
+```
+
+#### Use logical vectors
+```{r}
+iris[which(iris$Sepal.Length > 5 & iris$Sepal.Width > 4), ]
+```
+
+
+#### Use SQL statement
+```{r, eval=FALSE}
+install.packages('sqldf')
+library(sqldf)
+sqldf('select * from iris where Sepal_Length > 5 and Sepal_Width > 4')
+```
+
+### Subsetting the dataset III: Random Sample
+The following code random sample (without replacement) 90% of the original dataset and assgin them to a new variable *iris_sample*. 
+```{r}
+iris_sample = iris[sample(nrow(iris),nrow(iris)*0.90),]
+```
+
+
+
+### Summary Statistics and Plots
+
+Summary statistics of every variable
+```{r}
+summary(iris)
+```
+
+Frequency of species
+```{r}
+table(iris$Species)
+```
+
+Pie Chart
+```{r}
+pie(table(iris$Species))
+```
+
+Plot histogram and density plot of Sepal.length
+```{r}
+hist(iris$Sepal.Length)
+plot(density(iris$Sepal.Length))
+```
+
+Scatter plot of length and width of sepals
+```{r}
+plot(iris$Sepal.Length, iris$Sepal.Width)
+```
+
+Parallel Coordinates
+```{r}
+library(MASS)
+parcoord(iris[,1:4],col=iris$Species)
+```
+
+
+Chernoff faces of the first 20 obs
+```{r, eval=FALSE}
+install.packages("aplpack")
+```
+```{r, results='hide', warning=FALSE}
+library(aplpack)
+```
+
+```{r}
+faces(iris[1:20,1:4],main="Faces for Iris Data",label=iris$Species[1:20])
+```
+
+
+### Cluster Analysis
+#### K-means clustering
+K-means clustering with 5 clusters, the 'fpc' package provides the 'plotcluster' function. You need to run _install.packages('fpc')_ to install it first.
+
+
+
+
+```{r results='hide',message=FALSE,warning=FALSE}
+library(fpc)
+```
+
+```{r}
+fit = kmeans(iris[,1:4], 5)
+plotcluster(iris[,1:4], fit$cluster)
+```
+The first argument of the kmeans function is the dataset that you wish to cluster, that is the column 1-4 in the iris dataset, the last column is true category the observation so we do not include it in the analysis; the second argument 5 indicates that you want a 5-cluster solution. The result of the cluster analysis is then assigned to the variable fit, and the plotcluster function is used to visualize the result.
+
+**Do you think it is a good solution? Try it with 3 cluster.**
+```{r}
+kmeans_result = kmeans(iris[,1:4], 3)
+plotcluster(iris[,1:4], kmeans_result$cluster)
+```
+
+#### Hierarchical clustering
+```{r}
+hc_result = hclust(dist(iris[,1:4]))
+plot(hc_result)
+#Cut Dendrogram into 3 Clusters
+rect.hclust(hc_result, k=3)
+```
+
+3 things happened in the first line. First dist(iris[, 1:4]) calculates the distance matrix between observations (how similar the observations are from each other judging from the 4 numerical variables). Then hclust takes the distance matrix as input and gives a hierarchical cluster solution. At last the solution is assigned to the variable hc_result. In hierarchical clustering you do not need to give the number of how many clusters you want, it depends on how you cut the dendrogram. 
+
+### Analysis Using Rattle
+You can follow this video:
+http://www.youtube.com/watch?v=7P16fj0tqa4&hd=1

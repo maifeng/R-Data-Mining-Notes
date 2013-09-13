@@ -1,0 +1,217 @@
+Case 2 Lab
+========================================================
+### Executive Summary  
+This tutorial illustrates the implentations of clustering and association rule mining in (R), which will help you finish Case Study 2.
+
+****
+<a id="content"></a> Content 
+-------------------
+### [Data] (#data)   
+### [RODBC](#rodbc)   
+### [Clustering](#cluster)   
+### [Association Rules](#arules)  
+****
+
+### <a id="data"></a>Cincinnati Zoo Data 
+This lab uses the Cincinnati Zoo Data, which is from former MSQA student Ben Cofie's Master's thesis. A copy of his thesis can be found on BB.
+
+### <a id="rodbc"></a>RODBC package
+The [RODBC](http://cran.r-project.org/web/packages/RODBC/RODBC.pdf) package provides access to databases (including Microsoft Access and Microsoft SQL Server) through an ODBC interface.
+The primary functions are given below. 
+
+Function |Description
+------------|---------------
+odbcConnect(dsn, uid="", pwd="") | Open a connection to an ODBC database
+sqlFetch(channel, sqtable)	 | Read a table from an ODBC database into a data frame
+sqlQuery(channel, query)	| Submit a query to an ODBC database and return the results
+sqlSave(channel, mydf, tablename = sqtable, append = FALSE) | 	Write or update (append=True) a data frame to a table in the ODBC database
+sqlDrop(channel, sqtable)	 | Remove a table from the ODBC database
+close(channel)	| Close the connection
+
+****
+### <a id="cluster"></a>Clustering
+Data I/O and Some Preprocessing
+```{r,eval=F}
+#Import raw data from excel
+library(RODBC)
+channel <- odbcConnectExcel("D:/qry_Food_by_Month.xls")
+ZooFood <- sqlFetch(channel, "qry_Food_by_MonthEdited")
+odbcClose(channel)
+```
+**Note:**  *odbcConnectExcel* function is only usable with 32-bit Windows. To change setting in Rstudio, go to Tools -> Options -> General R Versions: select 32 bit R version. You may need to restart Rstudio to make the change take effect.
+
+
+```{r}
+load("I:/BANA7047/Case 2/case2 RWSpace.RData")
+```
+
+```{r}
+#Delete missing rows with missing data
+ZooFood<-na.omit(ZooFood)
+#Exclude column 1 which contains text from data matrix
+ZooFood.use<- ZooFood [,-1]
+#re-name the rows
+dimnames(ZooFood.use)[[1]] <- ZooFood[,1]
+#Scale data using the column means.
+ZooFood.use<-scale(ZooFood.use) #Scale Data to have zero mean and unit variance for each column
+```
+
+
+Determine number of clusters. Here a simple within group sum of squares method is used. For more sophiscated methods, see for example [blog](http://blog.echen.me/2011/03/19/counting-clusters/), or [course notes](http://www.bx.psu.edu/old/courses/bx-fall04/How_Many_Clusters.pdf).
+```{r}
+# Determine number of clusters
+wss <- (nrow(ZooFood.use)-1)*sum(apply(ZooFood.use,2,var))
+for (i in 2:12) wss[i] <- sum(kmeans(ZooFood.use,
+                                     centers=i)$withinss)
+plot(1:12, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
+```
+
+Use k-means method for clustering and plot results.
+```{r}
+# K-Means Cluster Analysis
+fit <- kmeans(ZooFood.use, 5) #5 cluster solution
+#Display number of clusters in each cluster
+table(fit$cluster)
+#Plot cluster in kmeans
+install.packages("fpc")
+library(fpc)
+plotcluster(ZooFood.use, fit$cluster)
+#See exactly which item are in 1st group
+ZooFood$NickName[fit$cluster==1]
+# get cluster means for scaled data
+aggregate(ZooFood.use,by=list(fit$cluster),FUN=mean)
+#or alternatively, use the output of kmeans
+fit$centers
+#get cluster means for raw data
+Ageish<-aggregate(ZooFood[,-c(1,1)],by=list(fit$cluster),FUN=mean)
+Ageish
+```
+
+```{r}
+#Wards Method or Hierarchical clustering
+#Calculate the distance matrix
+ZooFood.dist=dist(ZooFood.use)
+#Obtain clusters using the Wards method
+ZooFood.hclust=hclust(ZooFood.dist, method="ward")
+plot(ZooFood.hclust)
+#Cut dendrogram at the 3 clusters level and obtain cluster membership
+groupZooFood.3 = cutree(ZooFood.hclust,k=3)
+table(groupZooFood.3)
+#See exactly which item are in third group
+ZooFood$NickName[groupZooFood.3==3]
+#get cluster means for raw data
+aggregate(ZooFood[,-c(1,1)],by=list(groupZooFood.3),FUN=mean)
+# Centroid Plot against 1st 2 discriminant functions
+#Load the fpc library needed for plotcluster function
+library(fpc)
+#plotcluster(ZooFood, fit$cluster)
+plotcluster(ZooFood.use, groupZooFood.3)
+```
+
+[go to top](#content)
+****
+### <a id="arules"></a>Association Rules
+Association Rules is a popular and well researched method for discovering
+interesting relations between variables in large databases. [*arules*](http://cran.r-project.org/web/packages/arules/arules.pdf) package in R provides a basic infrastructure for creating and manipulating input data sets and for analyzing the resulting itemsets and rules.
+
+Data I/O and summary of transaction data
+```{r,eval=FALSE}
+#Import raw data from excel
+library(RODBC)
+channel <- odbcConnectExcel("I:/BANA7047/Case 2/food_4_association.xls")
+TransFood <- sqlFetch(channel, "Sheet1")
+odbcClose(channel)
+```
+
+```{r}
+load("I:/BANA7047/Case 2/case2 RWSpace.RData")
+
+TransFood.use<- TransFood[,-c(1,1)]
+
+#Load the arules library
+library(arules)
+
+#Transform raw data into matrix form
+TransFood.use<-as(as.matrix(TransFood.use),"transactions")
+#TransFood.use <- as.matrix(TransFood.use)
+
+#run summary report
+summary(TransFood.use)
+```
+*as()* function coerce the dataset into transaction data type for association rules mining. *summary()* displays the most frequent items in the data set, information about the transaction
+length distribution and that the data set contains some extended transaction information.
+We see that the data set contains transaction IDs. This additional information can be used for analyzing the data
+set. 
+
+To find the very long transactions we can use the *size()* and select very long transactions (containing more than 10 items).
+```{r}
+#
+transactionInfo(TransFood.use[size(TransFood.use) > 10])
+```
+
+To see which items are important in the data set we can use the *itemFrequencyPlot()*. To reduce the number of items, we only plot the item frequency for items with a support greater than 10%. The label size is reduced with the parameter *cex.names*.
+```{r}
+#
+itemFrequencyPlot(TransFood.use, support = 0.1, cex.names=0.8)
+
+```
+
+
+Use *apriori()* algorithm to find all rules (the default association type for
+*apriori()*) with a minimum support of 1% and a confidence of 0.6.
+```{r}
+# Run the apriori algorithm
+basket_rules <- apriori(TransFood.use,parameter = list(sup = 0.003, conf = 0.7,target="rules"))
+
+summary(basket_rules)
+```
+Recall from class:
+* **Support**: The support of an itemset X or $latex supp(X)$ is defined as the proportion of
+transactions in the data set which contain the itemset. In the zoo data, the support for the rules is relatively low, with a maximum support of no more than 3%. 
+* **Confidence**: The confidence of a rule is defined as $latex conf( X\Rightarrow Y) = supp( X \cup Y )/supp(X)$. For example, the
+rule {milk, bread} $latex \Rightarrow$ {butter} has a confidence of 0.5,
+which means that for 50% of the transactions containing milk and bread the rule is correct.
+Confidence can be interpreted as an estimate of the conditional probability P(Y |X), the probability of
+finding the RHS of the rule in transactions under the condition that these transactions also
+contain the LHS. Association rules are required to satisfy both a minimum support and a minimum confidence
+constraint at the same time.
+
+* **Lift**: Life is a popular measure of to filter or rank found rules. The lift of a rule is defined as $latex lift(X \Rightarrow Y ) = supp(X \cup Y )/(supp(X)supp(Y ))$. Lift can be interpreted as the deviation of the support of the whole rule from the support expected
+under independence given the supports of the LHS and the RHS. Greater lift values indicate
+stronger associations.
+```{r}
+# Check the generated rules using inspect
+inspect(basket_rules)
+```
+
+As typical for association rule mining, the number of rules found is huge. To analyze these
+rules, for example, subset() can be used to produce separate subsets of rules. Now find the subset of rules that has 3 or more length (lhs+rhs).
+```{r}
+#Basket rules of size greater than 2
+inspect(subset(basket_rules, size(basket_rules)>2))
+
+#Basket rules of size greater than 3
+inspect(subset(basket_rules, size(basket_rules)>3))
+
+```
+There are no rules that have more than 3 items in total (lhs+rhs).
+
+Now find the subset rules that has "Ice Cream ConeFood" in the right hand side. Here we require *lift* measure exceeds 1.2.
+```{r}
+icecream.rhs <- subset(basket_rules, subset = rhs %in% "Ice Cream ConeFood" & lift>1.2)
+```
+Now inspect the subset rules
+```{r}
+inspect(icecream.rhs)
+```
+
+Now find the subset rules that has "Bottled WaterFood" in the left hand side.
+```{r}
+water.lhs <- subset(basket_rules, subset = lhs %in% "Bottled WaterFood" & lift>1.2)
+```
+Now inspect the subset rules
+```{r}
+inspect(water.lhs)
+```
+
+[go to top](#content)

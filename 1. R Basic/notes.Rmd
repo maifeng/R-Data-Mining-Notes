@@ -1,4 +1,4 @@
-Lab 1: Introduction to R
+Introduction to R
 ========================================================
 
 Objective of this lab
@@ -13,10 +13,10 @@ Before You Start: Install R, RStudio
 **R**
 
 Windows:
-http://cran.case.edu/bin/windows/base/R-2.15.2-win.exe
+http://cran.case.edu/bin/windows/base/R-3.0.1-win.exe
 
 Mac OS X:
-http://cran.case.edu/bin/macosx/R-2.15.2.pkg
+http://cran.case.edu/bin/macosx/R-latest.pkg
 
 **RStudio**
 

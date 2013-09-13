@@ -1,5 +1,5 @@
 # History files
 .Rhistory
-
+*.md
 # Example code in package build process
 *-Ex.R
