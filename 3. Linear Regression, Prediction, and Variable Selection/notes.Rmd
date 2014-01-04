@@ -1,7 +1,7 @@
 Regression and Variable Selection
 ========================================================
 
-The objective of this case is to get you started with regression model building, variable selection, and model evaluation in R, and help you with Case 2.
+The objective of this case is to get you started with regression model building, variable selection, and model evaluation in R.
 
 Code in this file is not the only correct way to do things, however it is important for you to understand what each statement does. You will have to modify the code accordingly for your homework. 
 
@@ -36,7 +36,7 @@ medv	| median value of owner-occupied homes in USD 1000's
 Next we sample 90% of the original data and use it as the training set. The remaining 10% is used as test set. The regression model will be built on the training set and future performance of your model will be evaluated with the test set.
 
 ```{r}
-subset <- sample(nrow(Boston),nrow(Boston)*0.90)
+subset = sample(nrow(Boston),nrow(Boston)*0.90)
 Boston_train = Boston[subset,]
 Boston_test = Boston[-subset,]
 ```
@@ -46,12 +46,12 @@ If we want our results to be invariant to the units and the parameter estimates 
 
 1st Way: create new variables manually.
 ```{r, eval=FALSE}
-Boston$sd.crim<-(Boston$crim-mean(Boston$crim))/sd(Boston$crim); 
+Boston$sd.crim = (Boston$crim-mean(Boston$crim))/sd(Boston$crim); 
 ```
 
 This does the same thing.
 ```{r,eval=FALSE}
-Boston$sd.crim<- scale(Boston$crim); 
+Boston$sd.crim = scale(Boston$crim); 
 ```
 
 
@@ -71,13 +71,13 @@ You task is to build a best model with training data. You can refer to the regre
 
 The following model includes all $x$ varables in the model
 ```{r, eval=FALSE}
-model_1 <- lm(medv~crim+zn+chas+nox+rm+dis+rad+tax+ptratio+black+lstat, data=Boston_train)
+model_1 = lm(medv~crim+zn+chas+nox+rm+dis+rad+tax+ptratio+black+lstat, data=Boston_train)
 ```
 
 To include all variables in the model, you can write the statement this simpler way.
 
 ```{r}
-model_1 <- lm(medv~., data=Boston_train)
+model_1 = lm(medv~., data=Boston_train)
 summary(model_1)
 ```
 
@@ -98,7 +98,7 @@ Evaluating Model Fitness
 MSE of the regression, which is the square of 'Residual standard error' in the above summary. It is the sum of squared residuals(SSE) divided by degrees of freedom (n-p-1). In some textbooks the sum of squred residuals(SSE) is called residual sum of squares(RSS). MSE of the regression should be the unbiased estimator for variance of $\epsilon$, the error term in the regression model.
 
 ```{r}
-model_summary <- summary(model_1)
+model_summary = summary(model_1)
 (model_summary$sigma)^2
 ```
 
@@ -125,19 +125,19 @@ BIC, AIC, and Adjusted $R^2$ have complexity penalty in the definition, thus whe
 To evaluate how the model performs on future data, we use predict() to get the predicted values from the test set.
 ```{r, eval=FALSE}
 #pi is a vector that contains predicted values for test set.
-pi <- predict(object = model_1, newdata = Boston_test)
+pi = predict(object = model_1, newdata = Boston_test)
 ```
 Just as any other function, you can write the above statement the following way as long as the arguments are in the right order.
 
 ```{r, echo=FALSE}
-subset <- sample(nrow(Boston),nrow(Boston)*0.90)
+subset = sample(nrow(Boston),nrow(Boston)*0.90)
 Boston_train = Boston[subset,]
 Boston_test = Boston[-subset,]
-model_1 <- lm(medv~., data=Boston_train)
+model_1 = lm(medv~., data=Boston_train)
 ```
 
 ```{r, eval=TRUE}
-pi <- predict(model_1, Boston_test)
+pi = predict(model_1, Boston_test)
 ```
 
 The most common measure is the Mean Squared Error (MSE): average of the squared differences between the predicted and actual values
@@ -163,8 +163,8 @@ Variable Selection
 ------------------------
 ### Compare Model Fit Manually
 ```{r eval=FALSE}
-model_1 <- lm(medv~., data = Boston_train)
-model_2 <- lm(medv~crim+zn, data = Boston_train)
+model_1 = lm(medv~., data = Boston_train)
+model_2 = lm(medv~crim+zn, data = Boston_train)
 summary(model_1)
 summary(model_2)
 AIC(model_1)
@@ -182,7 +182,7 @@ library(leaps)
 Which subset of variables should you include in order to minimize BIC?
 ```{r}
 #regsubsets only takes data frame as input
-subset_result <- regsubsets(medv~.,data=Boston_train, nbest=2, nvmax = 14)
+subset_result = regsubsets(medv~.,data=Boston_train, nbest=2, nvmax = 14)
 summary(subset_result)
 plot(subset_result, scale="bic")
 ```
@@ -203,16 +203,16 @@ nullmodel is the model with no varaible in it, while fullmodel is the model with
 
 #### Backward Elimination
 ```{r}
-model.step<-step(fullmodel,direction='backward')
+model.step = step(fullmodel,direction='backward')
 ```
 
 #### Forward Selection
 ```{r}
-model.step<-step(nullmodel, scope=list(lower=nullmodel, upper=fullmodel), direction='forward')
+model.step = step(nullmodel, scope=list(lower=nullmodel, upper=fullmodel), direction='forward')
 ```
 #### Stepwise Selection (Output Omitted)
 ```{r, eval=FALSE}
-model.step<-step(nullmodel, scope=list(lower=nullmodel, upper=fullmodel), direction='both')
+model.step=step(nullmodel, scope=list(lower=nullmodel, upper=fullmodel), direction='both')
 ```
 
 One caution when comparing fit statistics using AIC, the definition varies by program/procedure.
@@ -223,6 +223,8 @@ AIC(model_1)
 
 * For pros and cons of variable/model selection using the common fit statistics: (adjusted) $R^2$, MSE, AIC, BIC, etc. refer to Ch9 in "Applied Linear Regression Models" by Kutner et al.
 * For other variable selection methods refer to section 3.4 - 3.8 of ["Elements of Statistical Learning" (Free Online)](http://www-stat.stanford.edu/~tibs/ElemStatLearn/).
+
+
 
 Cross Validation
 -----------------
@@ -301,3 +303,5 @@ Residual vs. Leverage | No observation with large Cook's distance
 ```{r}
 plot(model_1)
 ```
+
+

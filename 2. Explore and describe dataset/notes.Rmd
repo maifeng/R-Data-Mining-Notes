@@ -1,7 +1,7 @@
 Explore Iris Dataset
 ========================================================
 
-Objective of this lab
+Outline of this lab
 ------------
 1. Install Rattle
 2. Exploration and basic visualization using R/Rattle
@@ -23,7 +23,7 @@ Explore the *iris* Dataset with R
 ### Load Data
 The *iris* flower data set is included in R. It is a data frame with 150 cases (rows) and 5 variables (columns) named Sepal.Length, Sepal.Width, Petal.Length, Petal.Width, and Species.
 
- First, load iris data to the current workspace
+First, load iris data to the current workspace
  
 ```{r}
 data(iris)
@@ -58,6 +58,8 @@ colnames(iris)
 str(iris)
 ```
 
+By default, R treat strings as factors (or categorical variables), in many situations  (for example, building a regression model) this is what you want because R can automatically create "dummy variables" from the factors. However when merging data from different sources this can cause errors. In this case you can use _stringsAsFactors = FALSE_ option in _read.table_.
+
 ### Subsetting the dataset I: Numerical Index and Variable Names
  Get the first 5 rows/obs
 ```{r first5}
@@ -78,9 +80,18 @@ iris[1:10, 1]
 ```
 
 ### Subsetting the dataset II: Logical Conditions
-There are 3 ways to get subset of data that satisfy certain logical conditions. These kind of operations are called filtering in Excel. Knowing any one of these well is enough. Do not worry about memorizing the syntax, you can always look them up.
+There are 3 ways to get subsets of data that satisfy certain logical conditions. These kind of operations are called filtering in Excel. Knowing any one of these well is enough. Do not worry about memorizing the syntax, you can always look them up.
 
-Suppose we want to get the **subset of data that has Sepal.Length > 5 and Sepal.Width > 4**.
+Suppose we want to get the **observations that have Sepal.Length > 5 and Sepal.Width > 4**.
+
+#### Logical operators
+!=  not equal to
+
+==  equal to
+
+|  or
+
+& and
 
 #### Use subset function
 ```{r, eval=FALSE}
@@ -93,7 +104,7 @@ subset(iris, Sepal.Length > 5 & Sepal.Width > 4)
 
 #### Use logical vectors
 ```{r}
-iris[which(iris$Sepal.Length > 5 & iris$Sepal.Width > 4), ]
+iris[(iris$Sepal.Length > 5 & iris$Sepal.Width > 4), ]
 ```
 
 
@@ -103,11 +114,12 @@ install.packages('sqldf')
 library(sqldf)
 sqldf('select * from iris where Sepal_Length > 5 and Sepal_Width > 4')
 ```
+Note that in sql . in the variable name is changed to _. 
 
 ### Subsetting the dataset III: Random Sample
 The following code random sample (without replacement) 90% of the original dataset and assgin them to a new variable *iris_sample*. 
 ```{r}
-iris_sample = iris[sample(nrow(iris),nrow(iris)*0.90),]
+iris_sample = iris[sample(x = nrow(iris), size = nrow(iris)*0.90),]
 ```
 
 
@@ -164,7 +176,9 @@ faces(iris[1:20,1:4],main="Faces for Iris Data",label=iris$Species[1:20])
 #### K-means clustering
 K-means clustering with 5 clusters, the 'fpc' package provides the 'plotcluster' function. You need to run _install.packages('fpc')_ to install it first.
 
-
+```{r, eval=FALSE}
+install.packages("fpc")
+```
 
 
 ```{r results='hide',message=FALSE,warning=FALSE}
@@ -177,7 +191,7 @@ plotcluster(iris[,1:4], fit$cluster)
 ```
 The first argument of the kmeans function is the dataset that you wish to cluster, that is the column 1-4 in the iris dataset, the last column is true category the observation so we do not include it in the analysis; the second argument 5 indicates that you want a 5-cluster solution. The result of the cluster analysis is then assigned to the variable fit, and the plotcluster function is used to visualize the result.
 
-**Do you think it is a good solution? Try it with 3 cluster.**
+Do you think it is a good solution? Try it with 3 cluster.
 ```{r}
 kmeans_result = kmeans(iris[,1:4], 3)
 plotcluster(iris[,1:4], kmeans_result$cluster)
@@ -194,5 +208,5 @@ rect.hclust(hc_result, k=3)
 3 things happened in the first line. First dist(iris[, 1:4]) calculates the distance matrix between observations (how similar the observations are from each other judging from the 4 numerical variables). Then hclust takes the distance matrix as input and gives a hierarchical cluster solution. At last the solution is assigned to the variable hc_result. In hierarchical clustering you do not need to give the number of how many clusters you want, it depends on how you cut the dendrogram. 
 
 ### Analysis Using Rattle
-You can follow this video:
+Similar analysis can be done using Rattle. You can follow this video or play around yourself:
 http://www.youtube.com/watch?v=7P16fj0tqa4&hd=1

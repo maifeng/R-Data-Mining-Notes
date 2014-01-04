@@ -1,7 +1,7 @@
 Introduction to R
 ========================================================
 
-Outlines of this lab
+Outline of this lab
 ------------
 1. Install R and RStudio
 2. Learn basic commands and data types in R
@@ -262,7 +262,7 @@ abs_val(-5)
 2. In Rstudio, pressing tab after a function name gives help about the arguments
 3. A google search will probably answer most of your questions.
 4. Where to ask questions?
-  * Stackoverflow: http://stackoverflow.com/questions/tagged/r
+  * Stackoverflow (a more friendly place): http://stackoverflow.com/questions/tagged/r
   * R Help Mailing List: http://r.789695.n4.nabble.com/R-help-f789696.html
 
 
