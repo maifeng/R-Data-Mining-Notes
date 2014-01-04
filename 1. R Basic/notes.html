@@ -184,11 +184,11 @@ hljs.initHighlightingOnLoad();
 <body>
 <h1>Introduction to R</h1>
 
-<h2>Objective of this lab</h2>
+<h2>Outlines of this lab</h2>
 
 <ol>
 <li>Install R and RStudio</li>
-<li>Learn basic commands in R</li>
+<li>Learn basic commands and data types in R</li>
 <li>Get started with Rattle</li>
 </ol>
 
@@ -197,7 +197,7 @@ hljs.initHighlightingOnLoad();
 <p><strong>R</strong></p>
 
 <p>Windows:
-<a href="http://cran.case.edu/bin/windows/base/R-3.0.1-win.exe">http://cran.case.edu/bin/windows/base/R-3.0.1-win.exe</a></p>
+<a href="http://cran.r-project.org/bin/windows/base/">http://cran.r-project.org/bin/windows/base/</a></p>
 
 <p>Mac OS X:
 <a href="http://cran.case.edu/bin/macosx/R-latest.pkg">http://cran.case.edu/bin/macosx/R-latest.pkg</a></p>
@@ -213,21 +213,6 @@ hljs.initHighlightingOnLoad();
 
 <p>Install R Studio:
 <a href="http://www.youtube.com/watch?v=6aTRbo7kdGk&amp;hd=1">http://www.youtube.com/watch?v=6aTRbo7kdGk&amp;hd=1</a></p>
-
-<h2>Install Rattle</h2>
-
-<h3>Rattle: &ldquo;A Graphical User Interface for Data Mining using R&rdquo;.</h3>
-
-<p>With Rattle you can presents statistical and visual summaries of data, transforms data into forms that can be readily modelled, builds both unsupervised and supervised models from the data, presents the performance of models graphically, and scores new datasets.<a href="http://rattle.togaware.com/" title="Rattle Official Website">1</a></p>
-
-<p>Basically, <em>R</em> is a command line language, <em>RStudio</em> offers a pleasant development enviroment for you to write code and manage projects, and <em>Rattle</em> is a package in R that allows you to do Data Mining tasks in a graphical interface. </p>
-
-<p>To install Rattle, startup R and then run the following command:</p>
-
-<pre><code class="r">install.packages(&quot;rattle&quot;)
-</code></pre>
-
-<p>Alternatively, you can use the <em>Install Packages</em> in RStudio.</p>
 
 <h2>R Basics</h2>
 
@@ -280,6 +265,8 @@ x + y
 
 <pre><code>## [1] -0.8391
 </code></pre>
+
+<p>The log, exp, cos operators are <em>functions</em> in r. They take inputs (also called <em>arguments</em>) in parentheses and give outputs.</p>
 
 <p>Logical operations:</p>
 
@@ -341,23 +328,30 @@ summary(z)
 ##     3.0     4.5     6.0     6.0     7.5     9.0
 </code></pre>
 
-<h3>Data Types in R: Vectors, matrices and data frames</h3>
+<h3>Data Types in R: Vectors, matrices, data frames</h3>
 
 <ul>
-<li><p>Vector is a list of numbers (or strings), \( z \) is a vector with \( [3,5,7,9] \)</p></li>
-<li><p>Matrix is a table of numbers (or strings). \( A \) is a matrix with 2 rows and 3 columns. </p></li>
-<li><p>Data frames in R are the &ldquo;datasets&rdquo;&ldquo;, that is tables of data with each row as an observation, and each column representing a variable. Data frames have column names (variable names) and row names. In the example, the function <em>data.frame(A)</em> transforms the matrix \( A \) into a data frame. Most of the time you will import a text file as a data frame or use one of the example datasets that come with R.</p></li>
+<li><p><strong>Vector</strong> is a list of numbers (or strings), \( z \) is a vector with \( [3,5,7,9] \)</p></li>
+<li><p><strong>Matrix</strong> is a table of numbers (or strings). \( A \) is a matrix with 2 rows and 3 columns. </p></li>
 </ul>
 
 <pre><code class="r">
 z = c(3, 5, 7, 9)
 
-A = matrix(c(1, 2, 3, 4, 5, 6), nrow = 2)
-
-df = data.frame(A)
+A = matrix(data = c(1, 2, 3, 4, 5, 6), nrow = 2)
 </code></pre>
 
-<p>Elementwise operations</p>
+<p><em>matrix()</em> is a function that creates a matrix from a given vector. Some of the arguments in a function can be optional. For example you can also add the <em>ncol</em> arguments, which is unnecessary in this situation.</p>
+
+<pre><code class="r">A = matrix(data = c(1, 2, 3, 4, 5, 6), nrow = 2, ncol = 3)
+</code></pre>
+
+<p>Another way to write the function is to ignore the argument names and just put arguments in the right order, but this may cause confusion for readers.</p>
+
+<pre><code class="r">A = matrix(c(1, 2, 3, 4, 5, 6), 2, 3)
+</code></pre>
+
+<p>Elementwise operations for vectors and matrices</p>
 
 <pre><code class="r">z
 </code></pre>
@@ -387,22 +381,6 @@ df = data.frame(A)
 ## [2,]    4    6    8
 </code></pre>
 
-<pre><code class="r">df
-</code></pre>
-
-<pre><code>##   X1 X2 X3
-## 1  1  3  5
-## 2  2  4  6
-</code></pre>
-
-<pre><code class="r">df + 100
-</code></pre>
-
-<pre><code>##    X1  X2  X3
-## 1 101 103 105
-## 2 102 104 106
-</code></pre>
-
 <p>Subsetting, indexing</p>
 
 <pre><code class="r">length(z)
@@ -417,7 +395,8 @@ df = data.frame(A)
 <pre><code>## [1] 3 5 7
 </code></pre>
 
-<pre><code class="r">z[-1]
+<pre><code class="r"># All but the first element in z
+z[-1]
 </code></pre>
 
 <pre><code>## [1] 5 7 9
@@ -443,6 +422,14 @@ df = data.frame(A)
 ## [2,]    4    6
 </code></pre>
 
+<pre><code class="r">A[, c(1, 3)]
+</code></pre>
+
+<pre><code>##      [,1] [,2]
+## [1,]    1    5
+## [2,]    2    6
+</code></pre>
+
 <p>Matrix Calculation</p>
 
 <pre><code class="r"># Dimensions of A
@@ -462,31 +449,116 @@ t(A)
 ## [3,]    5    6
 </code></pre>
 
-<p>Data Frame</p>
+<pre><code class="r"># Matrix multiplication
+t(A) %*% A
+</code></pre>
 
-<p>df$var will select var from df</p>
+<pre><code>##      [,1] [,2] [,3]
+## [1,]    5   11   17
+## [2,]   11   25   39
+## [3,]   17   39   61
+</code></pre>
+
+<ul>
+<li><strong>Data frames</strong> in R are the &ldquo;datasets&rdquo;, that is tables of data with each row as an observation, and each column representing a variable. Data frames have column names (variable names) and row names. In the example, the function <em>data.frame(A)</em> transforms the matrix \( A \) into a data frame. Most of the time you will import a text file as a data frame or use one of the example datasets that come with R.</li>
+</ul>
+
+<p>You can use <em>data.frame()</em> to transform a matrix into a dataframe.</p>
+
+<pre><code class="r">df = data.frame(A)
+</code></pre>
+
+<p>Use the <em>read.table</em> or <em>read.csv</em> function to import comma/space/tab delimited text files. You can also use the Import Dataset Wizard in RStudio.</p>
+
+<pre><code class="r">mydata = read.table(&quot;c:/mydata.csv&quot;, header = TRUE, sep = &quot;,&quot;)
+</code></pre>
+
+<p>Subsetting elements from data frames is similar to subsetting from matrices. Since data frames have variable names (label for each column), you can also use</p>
+
+<ul>
+<li>df$var will select var from df</li>
+<li>df[, c(&#39;var1&#39;,&#39;var2&#39;)]  will select var1 and var2 from df</li>
+</ul>
 
 <p>In RStudio, hitting tab after <code>df$</code> allows you to select/autocomplete variable names in df  </p>
 
 <pre><code class="r"># Load cars dataset that comes with R (50 obs, 2 variables)
 data(cars)
+# Dimension
 dim(cars)
 </code></pre>
 
 <pre><code>## [1] 50  2
 </code></pre>
 
-<pre><code class="r"># First 2 obs of the variable dist in cars data frame
+<pre><code class="r"># Preview the first few lines
+head(cars)
+</code></pre>
+
+<pre><code>##   speed dist
+## 1     4    2
+## 2     4   10
+## 3     7    4
+## 4     7   22
+## 5     8   16
+## 6     9   10
+</code></pre>
+
+<pre><code class="r"># Variable names
+names(cars)
+</code></pre>
+
+<pre><code>## [1] &quot;speed&quot; &quot;dist&quot;
+</code></pre>
+
+<p>You can combine multiple ways to subset data</p>
+
+<pre><code class="r"># First 2 obs of the variable dist in cars
 cars$dist[1:2]
 </code></pre>
 
 <pre><code>## [1]  2 10
 </code></pre>
 
-<p>You can use the <em>read.table</em> function to import comma delimited text files (csv files). An easier way is to use the Import Dataset Wizard in RStudio.</p>
+<p>In the next lab we will see other ways to select data from data frames. </p>
 
-<pre><code class="r">mydata = read.table(&quot;c:/mydata.csv&quot;, header = TRUE, sep = &quot;,&quot;)
+<h3>Regression Model and the Data Type <strong>List</strong></h3>
+
+<pre><code class="r"># Load car dataset that comes with R
+data(cars)
+# fit a simple linear regression between braking distance and speed
+lm(dist ~ speed, data = cars)
 </code></pre>
+
+<pre><code>## 
+## Call:
+## lm(formula = dist ~ speed, data = cars)
+## 
+## Coefficients:
+## (Intercept)        speed  
+##      -17.58         3.93
+</code></pre>
+
+<ul>
+<li><strong>List</strong> is a container. You can put different types of objects into a list. For example, the result returned by the lm() function is a list.</li>
+</ul>
+
+<p>There are three ways to get an element from a list: use <em>listname[[i]]</em> to get the ith element of the list; use <em>listname[[&ldquo;elementname&rdquo;]]</em>; use <em>listname$elementname</em>. Note that you use double square brackets for indexing a list.</p>
+
+<pre><code class="r">reg = lm(dist ~ speed, data = cars)
+reg[[1]]
+reg[[&quot;coeffcients&quot;]]
+reg$coeffcients
+</code></pre>
+
+<p>If you have done object oriented programming before, the list &ldquo;reg&rdquo; is actually an object that belongs to class &ldquo;lm&rdquo;. The element names such as &ldquo;coeffcients&rdquo; are fields of the &ldquo;lm&rdquo; class.</p>
+
+<h3>Basic Plotting</h3>
+
+<pre><code class="r">plot(cars)
+</code></pre>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-14"/> </p>
 
 <h3>Probability Distributions</h3>
 
@@ -522,39 +594,15 @@ cars$dist[1:2]
 <pre><code class="r">rnorm(10)
 </code></pre>
 
-<pre><code>##  [1]  0.08679  1.29106  0.17671 -0.47900  0.72107 -0.55402 -0.30856
-##  [8]  1.57968 -1.45791  1.72941
+<pre><code>##  [1] -1.12477  1.63574 -1.03804 -0.39557 -0.04274  2.24396  0.99305
+##  [8] -0.06239  0.49142  0.99132
 </code></pre>
 
 <pre><code class="r">rnorm(n = 10, mean = 100, sd = 20)
 </code></pre>
 
-<pre><code>##  [1] 101.42  91.51 107.04  73.76 139.81 118.56 115.61 101.17  79.28 100.04
+<pre><code>##  [1] 105.91 125.56 137.31 124.81 108.38  67.21  70.15 136.59  71.80  91.81
 </code></pre>
-
-<h3>Regression Models</h3>
-
-<pre><code class="r"># Load car dataset that comes with R
-data(cars)
-# fit a simple linear regression between braking distance and speed
-lm(dist ~ speed, data = cars)
-</code></pre>
-
-<pre><code>## 
-## Call:
-## lm(formula = dist ~ speed, data = cars)
-## 
-## Coefficients:
-## (Intercept)        speed  
-##      -17.58         3.93
-</code></pre>
-
-<h3>Basic Plotting</h3>
-
-<pre><code class="r">plot(cars)
-</code></pre>
-
-<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAfgAAAH4CAMAAACR9g9NAAAAbFBMVEX9/v0AAAAAADkAAGUAOTkAOWUAOY8AZrU5AAA5ADk5AGU5OY85j9plAABlADllAGVlOQBlZjlltf2POQCPOTmPOWWPjzmPtY+P2/21ZgC1/rW1/v3ajzna24/a/v39tWX924/9/rX9/tr9/v0hhXJqAAAAJHRSTlP//////////////////////////////////////////////wBYLA0NAAAACXBIWXMAAAsSAAALEgHS3X78AAAKRUlEQVR4nO3dDZfaxhlA4bBNvVuHtVs2baGm5uv//8ci7bprAwuCmRfNzL3PyQlJfDyRfS2NJBDz205Iv429ARqH4aEMD2V4KMNDGR7K8FCGhzI8lOGhDA9leCjDQxkeyvBQhocyPJThoQwPZXgow0MZHsrwUIaHMjyU4aEMD2V4KMNDGR7K8FCGhzI8lOGhDA9leCjDQxkeyvBQhocyPJThoQwPZXgow0MZHsrwUIaHMjyU4aEMD2V4KMNDGR7K8FCGhzI8lOGhUsJPVLLA8Ak/V9EMD2V4qOTw66d+xvjLt2uH1qhSw29fZv3r6tP3K4fWqFLDb75+++V1+NAalXs8VPIcv3l2jq+RZ/VQhofKcTn3MPfkrjAXb8lmObnbvkwNX5TJ7uJvf57LucXjT+EHvg2gOHcI/3Y5t/z9s3t8Oe4Qfn85N+1elsfXc4YfT/wcf/vQGpXhoQwPZXio5Mu557drN0/u6pK8x3d3b24aWqNKP9RvvsxvGlqjco6HMjyU4aEMD2V4KMNDGR7K8FCGhzI8lOGhDA9leCjDQxkeyvBQhocyPJThoQwPZXgow0MZHsrwUIaHMjyU4aEMD2V4KMNDGR7K8FCGhzI8lOGhDA9leCjDQxkeyvBQLjEK5YKDUC4xCuUeD+USo1Ce1UMZHsrLOShP7qACLudcYrQG7vFQXs5BeVYPZXgow0MZHsolRqFcYhTKJUahnOOhDA9leCjDQxkeyvBQhocyPJThm3T580+Gb9Fkd/G33/AtMjzUgM+6Gr5FhofyUA9leCov5/QBw0MZHsrwUIaHMjyU4aEMD2V4KMNDGR7K8FCGhzI8lOGhDA9x+A694RmOPpNjeAbDj2Xk7/Y1/EgGfPwxeAOc40cxevhDhr8Pw1OV9v39hocyPJThoZLDuwpVnVLDuyZNpZK/ttxFhevkHg+VPMc3vgpVaZff2XhWf1ZxN9yyCQjf0kqThv/Q/nLucdnsod7wH9n+Od8tH/f9/2jz5K6NA9cJOS7nllMv56rjHg+VY46ftjvHt8vLOSjDQxkeyvBQhr+T0m4IGP4+irsFaPj7MDyU4amc41UEw0MZHsrwUIaHMjyU4aEMD2V4KMNDGR7K8FCGb5JryzINeBPY8C0yPJThqZzj9QHDj2bcD2MZfiwjf/zS8GMxPJThqZzjNQLD1ybTgcLwlcl1amD4yhgeyvBUzvFKYfiC3PPKflD41+8rPfGtpSlD69Bd7+UNCP+2FMFkcrwIRcrQOlRa+Ov39UFD61B54UOG1pHi5vjd8tP35WQyyzq0RjXsUP9lvv9r/dmTu3YMneP3+/zp8K40WaeBh/rJw3x18lDvunOVSj25c6XJSqWGd4+v1JAbOF//8+Fqkq40WSuv488q7itoswkI70qTNbjmXv3JQ/36abZ9OXkfv4XfMHT4vcV0/7duebkj3cndYtbuunNtHLhOSH1bdv8fuzUHvZyrzaDw25d+jz/5tux+d1/tf3R1fDgwfMmGHeq7WXxy6ki/t+jn/xM/aPiSeTkHZXgow0MZHsrwdzLkhkB5H72KGJplyC1AP2zZIMNDGZ7KOV5FMPy1ynu/7qYtMvyVynuH/rYtMvyVDJ86dKUMnzp0rZzjE4fWqAxfEK/jmbxzB2V4KMNTOcdXr7xrvkOGj1DeXZ4jho9geCjDUznHq1CGL4iXc0zewIEyPJThqZzjFc7wP7nv1bdry5bivvfbRr67Z/h3hn9n+Eb+byf/92egwjvHv2OFJzE8lOGhDA9leCjDQxkeyvB3Utqn8Ax/H8V97jY5vEuMDtJceBccHKa58C4xOlBrc7x7fKWS5/jGlxgd4sTOXNr+fcyz+mQnpu/iZvRjAeFbWmJ0CHL49ecTaxEW/ivPhhn+zMKzhf/K82HO8ZvnfXL0Hl+nDIf6zfOn/xq+Nlnm+PXTqRXGDV8yL+egDA9leCjDnxd4XeYDFQULvBPjI1QlM3z+oatg+PxD18E5PvvQGlWj4W/bm8p/ayWfNsPfNn9W8GZqPoZP/VmVMnzqz6pUm+Gd4y9qNLwuMXy6bB+98itNq5Ltw5Z3PccwfDLDXzd0Mwx/3dDtcI6/amiNyvBQhocyPJThoQwPZXgoTPjja2TSe3HHKOGP74qh3n0/Zngow0NRwjvHH2g0fLY3SZr989Jm+Gxvi7Y7Qxj+7M8yfP6hIxn+ojbDO8df1Gh4XQIO38iueyNu+FYm6xsZHsrwUNzwzvHntByerfTw7N0yUOHh4RNxoOTwsStNGj5KavjgdecMHyU1fPRKk87xQQrf4xUleY6vd6XJGw8mjRyDCj+rD3Tj6UMrZx0B4StZadLw5wy6nHuY17iMuOHPGXRyt32ZVhjeOf6cgZdzi8cKw7Nlupxb/n681mR9n7kjyXA5N+1elkUtKtzKRByozcs5w1+ECe/B/1dthj/O7DHgQH3hb3xWYmf4X1QXHn7fJRtKeOf4A5jw+lV14d1186gvvLIAh2cfOrjh4ScLhocyPBQ3vHP8OS2HZzM8lOGhDA9leCjDQxke6m7hA6+a2RfkN7pX+MD7ZPBbcDcyPJThoZzjoTyrhzI8lOGhDA9leCjDQxkeyvBQhocyPJThoQwPVXp434AJUnh433KNYngow0MVHt45Pkrp4RWkhY9e6QYNfNhStzA8lOGhnOOhPKuHSg4fu5q0oqSGd23ZSqWGP7GadCUrTcK5x0Mlz/H1ribN5lk9lOGhDA9leCjDQ0WGV8niwl/+k1Hn2HUOfeXYhm9laMNDhzY8dGjDQ4c2PHRow0OHLim8ymV4KMNDGR7K8FCGhzI8lOGhDA9leKi48MvJyQ/j57D+/K3/vP/xMx55ho7Y9O4RxFnQVr+NfdVmx4VfzKJGXnW/vO4Jn+VjyNARm775Mt+t/zYP2eq3sa/b7LDw2z/nQSMvHv693y27Z/n63TP/0BGbvupqL2YhW/029nWbHRa+f/IqaKfvfuvWf3zv/6gHDB216fvNDdrqfuzrNjssfHfsidrruzrdQ5xB4YM2ffsyjdrqfuzrNjv2rD5ong/e43vZN33zPN1FbXU/dm/wZlcbPmS2DAy/fuoGjNnq17F744fvDmrbf8ZdznUHt/xn9f+fRXJv+lubkK1+G/u6zQ69jn8IOrG/w3V87k1f9g+3zEK2+sfYV222d+6gDA9leCjDQxkeyvBQhocyPJThoQwPZXgow0MZHsrwUIaHMjyU4aEMD2V4KMNDGf4DP1bfapXhP2D4Vq36Z4o3X//VfyZ589w/J/v+8te/G75J3TMty8d94k/fV/vWi9cHHd5fVlFPfBaCG/71CbbN86x70rD7t/0fhR8vX795qG/W+qk7xvf9F7P+EeOH+dtL/zhN3Bc7FIEbftc/bdaF7/b41yWTf3pxj29U94hhF/75sf/HxfTwxTm+UYvXs/ov//hxVv/Ty/bFs/rGhXwvSQ0Mb3iRGB7K8FCGhzI8lOGhDA9leCjDQxkeyvBQhocyPJThoQwPZXio/wGb2Tm3SQ/0YQAAAABJRU5ErkJggg==" alt="plot of chunk unnamed-chunk-11"/> </p>
 
 <h3>Functions</h3>
 
@@ -583,7 +631,7 @@ lm(dist ~ speed, data = cars)
 <h3>Organizing your computations</h3>
 
 <ol>
-<li>R has a &quot;current directory&rdquo; (Working Directory). To set Working Directory in RStudio: Session -&gt; Set Working Directory.</li>
+<li>R has a &ldquo;current directory&rdquo; (Working Directory). To set Working Directory in RStudio: Session -&gt; Set Working Directory.</li>
 <li>Your objects (loaded datasets, variables, functions, etc.) are contained in your &ldquo;current workspace&rdquo;, which can be saved any time. In Rstudio: Session -&gt; Load Workspace/Save Workspace As.</li>
 <li>Keep it tidy! Keep separate projects (code, data files) in separate workspaces/directories.</li>
 </ol>
@@ -601,6 +649,21 @@ lm(dist ~ speed, data = cars)
 <li>R Help Mailing List: <a href="http://r.789695.n4.nabble.com/R-help-f789696.html">http://r.789695.n4.nabble.com/R-help-f789696.html</a></li>
 </ul></li>
 </ol>
+
+<h2>Install Rattle</h2>
+
+<h3>Rattle: &ldquo;A Graphical User Interface for Data Mining using R&rdquo;.</h3>
+
+<p>With Rattle you can presents statistical and visual summaries of data, transforms data into forms that can be readily modelled, builds both unsupervised and supervised models from the data, presents the performance of models graphically, and scores new datasets.<a href="http://rattle.togaware.com/" title="Rattle Official Website">1</a></p>
+
+<p>Basically, <em>R</em> is a command line language, <em>RStudio</em> offers a pleasant development enviroment for you to write code and manage projects, and <em>Rattle</em> is a package in R that allows you to do Data Mining tasks in a graphical interface. </p>
+
+<p>To install Rattle, startup R and then run the following command:</p>
+
+<pre><code class="r">install.packages(&quot;rattle&quot;)
+</code></pre>
+
+<p>Alternatively, you can use the <em>Install Packages</em> in RStudio.</p>
 
 <h3>Starting Rattle</h3>
 

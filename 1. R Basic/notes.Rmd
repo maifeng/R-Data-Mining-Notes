@@ -1,10 +1,10 @@
 Introduction to R
 ========================================================
 
-Objective of this lab
+Outlines of this lab
 ------------
 1. Install R and RStudio
-2. Learn basic commands in R
+2. Learn basic commands and data types in R
 3. Get started with Rattle
 
 
@@ -13,7 +13,7 @@ Before You Start: Install R, RStudio
 **R**
 
 Windows:
-http://cran.case.edu/bin/windows/base/R-3.0.1-win.exe
+http://cran.r-project.org/bin/windows/base/
 
 Mac OS X:
 http://cran.case.edu/bin/macosx/R-latest.pkg
@@ -31,21 +31,6 @@ http://www.youtube.com/watch?v=SJ9sVyqWJn8&hd=1
 Install R Studio:
 http://www.youtube.com/watch?v=6aTRbo7kdGk&hd=1
 
-
-Install Rattle
--------------
-### Rattle: "A Graphical User Interface for Data Mining using R". 
-With Rattle you can presents statistical and visual summaries of data, transforms data into forms that can be readily modelled, builds both unsupervised and supervised models from the data, presents the performance of models graphically, and scores new datasets.[1]
-
-Basically, *R* is a command line language, *RStudio* offers a pleasant development enviroment for you to write code and manage projects, and *Rattle* is a package in R that allows you to do Data Mining tasks in a graphical interface. 
-
-To install Rattle, startup R and then run the following command:
-
-```{r, eval=FALSE}
-install.packages("rattle")
-```
-
-Alternatively, you can use the *Install Packages* in RStudio.
 
 R Basics
 --------------
@@ -78,6 +63,8 @@ exp(y)
 cos(x)
 ```
 
+The log, exp, cos operators are _functions_ in r. They take inputs (also called _arguments_) in parentheses and give outputs.
+
 Logical operations:
 ```{r}
 x == y
@@ -102,66 +89,125 @@ summary(z)
 ```
 
 
-### Data Types in R: Vectors, matrices and data frames
+### Data Types in R: Vectors, matrices, data frames
 
-* Vector is a list of numbers (or strings), $z$ is a vector with $[3,5,7,9]$
+* __Vector__ is a list of numbers (or strings), $z$ is a vector with $[3,5,7,9]$
 
-* Matrix is a table of numbers (or strings). $A$ is a matrix with 2 rows and 3 columns. 
-* Data frames in R are the "datasets"", that is tables of data with each row as an observation, and each column representing a variable. Data frames have column names (variable names) and row names. In the example, the function _data.frame(A)_ transforms the matrix $A$ into a data frame. Most of the time you will import a text file as a data frame or use one of the example datasets that come with R.
+* __Matrix__ is a table of numbers (or strings). $A$ is a matrix with 2 rows and 3 columns. 
 
 
 ```{r data_str}
 
 z = c(3,5,7,9)
 
-A = matrix(c(1,2,3,4,5,6), nrow = 2)
-
-df = data.frame(A) 
+A = matrix(data = c(1,2,3,4,5,6), nrow = 2)
 ```
 
-Elementwise operations
+_matrix()_ is a function that creates a matrix from a given vector. Some of the arguments in a function can be optional. For example you can also add the _ncol_ arguments, which is unnecessary in this situation.
+```{r, eval=FALSE}
+A = matrix(data = c(1,2,3,4,5,6), nrow = 2, ncol = 3)
+```
+Another way to write the function is to ignore the argument names and just put arguments in the right order, but this may cause confusion for readers.
+```{r, eval=FALSE}
+A = matrix(c(1,2,3,4,5,6), 2, 3)
+```
+
+Elementwise operations for vectors and matrices
 ```{r ele_op}
 z
 z/10
 A
 A+2
-df
-df+100
 ```
+
 Subsetting, indexing
 ```{r}
 length(z)
 z[1:3]
+#All but the first element in z
 z[-1]
 A[2,2]
 A[1, ]
 A[, 2:3]
+A[, c(1,3)]
 ```
+
 Matrix Calculation
 ```{r}
 # Dimensions of A
 dim(A)
 # Transpose
 t(A)
+# Matrix multiplication
+t(A) %*% A
 ```
-Data Frame
 
-df$var will select var from df
+* __Data frames__ in R are the "datasets", that is tables of data with each row as an observation, and each column representing a variable. Data frames have column names (variable names) and row names. In the example, the function _data.frame(A)_ transforms the matrix $A$ into a data frame. Most of the time you will import a text file as a data frame or use one of the example datasets that come with R.
 
+You can use _data.frame()_ to transform a matrix into a dataframe.
+```{r}
+df = data.frame(A) 
+```
+
+Use the _read.table_ or _read.csv_ function to import comma/space/tab delimited text files. You can also use the Import Dataset Wizard in RStudio.
+```{r, eval=FALSE}
+mydata = read.table("c:/mydata.csv", header=TRUE, sep=",")
+```
+
+
+Subsetting elements from data frames is similar to subsetting from matrices. Since data frames have variable names (label for each column), you can also use
+
+ * df$var will select var from df
+ * df[, c('var1','var2')]  will select var1 and var2 from df
+ 
 In RStudio, hitting tab after `df$` allows you to select/autocomplete variable names in df  
 
 ```{r}
 #Load cars dataset that comes with R (50 obs, 2 variables)
 data(cars)
+#Dimension 
 dim(cars)
-#First 2 obs of the variable dist in cars data frame
+#Preview the first few lines
+head(cars)
+#Variable names
+names(cars)
+```
+You can combine multiple ways to subset data
+```{r}
+#First 2 obs of the variable dist in cars
 cars$dist[1:2]
 ```
 
-You can use the _read.table_ function to import comma delimited text files (csv files). An easier way is to use the Import Dataset Wizard in RStudio.
-```{r, eval=FALSE}
-mydata = read.table("c:/mydata.csv", header=TRUE, sep=",")
+In the next lab we will see other ways to select data from data frames. 
+
+
+### Regression Model and the Data Type __List__
+```{r}
+# Load car dataset that comes with R
+data(cars)
+#fit a simple linear regression between braking distance and speed
+lm(dist~speed, data=cars)
 ```
+
+* __List__ is a container. You can put different types of objects into a list. For example, the result returned by the lm() function is a list.
+
+There are three ways to get an element from a list: use _listname[[i]]_ to get the ith element of the list; use _listname[["elementname"]]_; use _listname$elementname_. Note that you use double square brackets for indexing a list.
+
+```{r, eval=FALSE}
+reg = lm(dist~speed, data = cars)
+reg[[1]]
+reg[["coeffcients"]]
+reg$coeffcients
+```
+
+If you have done object oriented programming before, the list "reg" is actually an object that belongs to class "lm". The element names such as "coeffcients" are fields of the "lm" class.
+
+### Basic Plotting
+```{r}
+plot(cars)
+```
+
+
 
 ### Probability Distributions
 Types of distributions: norm, binom, beta, cauchy, chisq, exp, f, gamma, geom, hyper, lnorm, logis, nbinom, t, unif, weibull, wilcox
@@ -184,18 +230,6 @@ rnorm(10)
 rnorm(n=10,mean=100,sd=20)
 ```
 
-### Regression Models
-```{r}
-# Load car dataset that comes with R
-data(cars)
-#fit a simple linear regression between braking distance and speed
-lm(dist~speed, data=cars)
-```
-
-### Basic Plotting
-```{r}
-plot(cars)
-```
 
 ### Functions
 * Most of R consists of functions
@@ -230,6 +264,24 @@ abs_val(-5)
 4. Where to ask questions?
   * Stackoverflow: http://stackoverflow.com/questions/tagged/r
   * R Help Mailing List: http://r.789695.n4.nabble.com/R-help-f789696.html
+
+
+
+Install Rattle
+-------------
+### Rattle: "A Graphical User Interface for Data Mining using R". 
+With Rattle you can presents statistical and visual summaries of data, transforms data into forms that can be readily modelled, builds both unsupervised and supervised models from the data, presents the performance of models graphically, and scores new datasets.[1]
+
+Basically, *R* is a command line language, *RStudio* offers a pleasant development enviroment for you to write code and manage projects, and *Rattle* is a package in R that allows you to do Data Mining tasks in a graphical interface. 
+
+To install Rattle, startup R and then run the following command:
+
+```{r, eval=FALSE}
+install.packages("rattle")
+```
+
+Alternatively, you can use the *Install Packages* in RStudio.
+
 
 ### Starting Rattle
 To start Rattle, first load the Rattle package (after you install it), and use _rattle()_ command to launch it.
