@@ -97,7 +97,7 @@ Suppose we want to get the **observations that have Sepal.Length > 5 and Sepal.W
 ```{r, eval=FALSE}
 subset(x = iris, subset = Sepal.Length > 5 & Sepal.Width > 4)
 ```
-You can omit the x = and sebset = part
+You can omit the x = and subset = part
 ```{r eval=FALSE}
 subset(iris, Sepal.Length > 5 & Sepal.Width > 4)
 ```
