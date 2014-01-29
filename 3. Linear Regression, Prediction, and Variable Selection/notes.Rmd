@@ -36,9 +36,9 @@ medv	| median value of owner-occupied homes in USD 1000's
 Next we sample 90% of the original data and use it as the training set. The remaining 10% is used as test set. The regression model will be built on the training set and future performance of your model will be evaluated with the test set.
 
 ```{r}
-subset = sample(nrow(Boston),nrow(Boston)*0.90)
-Boston_train = Boston[subset,]
-Boston_test = Boston[-subset,]
+sample_index = sample(nrow(Boston),nrow(Boston)*0.90)
+Boston_train = Boston[sample_index,]
+Boston_test = Boston[-sample_index,]
 ```
 
 ### (Optional) Standardization
