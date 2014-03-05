@@ -205,11 +205,12 @@ cost1 <- function(r, pi){
   return(mean(weight1*c1+weight0*c0))
 }
 credit.glm1<-glm(Y~X3+X8+X11_2,family=binomial,credit.train); 
+prob <- predict(credit.glm1,type="response")
 for(i in 1:length(searchgrid))
 {
   pcut <- result[i,1]
   #assign the cost to the 2nd col
-  result[i,2] <- cost1(credit.train$Y, predict(credit.glm1,type="response"))
+  result[i,2] <- cost1(credit.train$Y, prob)
 }
 plot(result, ylab="Cost in Training Set")
 result[which.min(result[,2]),]

@@ -54,7 +54,7 @@ options(digits=7)
 ```{r}
 boston.rpart
 plot(boston.rpart)
-text(boston.rpart)
+text(boston.rpart, pretty = TRUE)
 ```
 
 #### Prediction using regression tree
@@ -108,7 +108,7 @@ For more advanced controls, you should carefully read the help document for the 
 ```{r}
 credit.rpart
 plot(credit.rpart)
-text(credit.rpart)
+text(credit.rpart, pretty = TRUE)
 ```
 
 #### Prediction using classification tree
