@@ -59,5 +59,4 @@ plot(cv_lasso_fit)
 
 [1]: Tibshirani, R. (1996). Regression shrinkage and selection via the lasso. Journal of the Royal Statistical Society. Series B (Methodological), 267-288.
 [2]: Zou, H., & Hastie, T. (2005). Regularization and variable selection via the elastic net. Journal of the Royal Statistical Society: Series B (Statistical Methodology), 67(2), 301-320.  
-[3]: http://www.stanford.edu/~hastie/TALKS/enet_talk.pdf "Regularization and Variable
-Selection via the Elastic Net"
+[3]: http://www.stanford.edu/~hastie/TALKS/enet_talk.pdf "Regularization and Variable Selection via the Elastic Net"

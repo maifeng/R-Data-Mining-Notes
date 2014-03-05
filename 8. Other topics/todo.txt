@@ -2,3 +2,22 @@ TODO:
 1. Text analysis.
 2. Big data (mapreduce)
 3. Improving R performance (apply, plyr, rcpp)
+
+
+
+Some resources to build a better tree model:  
+*Item 1 [prune](http://cran.r-project.org/web/packages/maptree/maptree.pdf) tree (avoid overfitting the data and improve out-of-sample prediction):
+```{r, eval=FALSE}
+library(maptree)
+prune(credit.tree)
+```
+*Item 2 [Random Forests](http://cran.r-project.org/web/packages/randomForest/randomForest.pdf) Breiman and Cutler's random forest approach, which may improve predictive accuracy by generating large number of bootstrapped trees.
+```{r,eval=FALSE}
+library(randomForest)
+credit.data$Y <- as.factor(credit.data$Y) #without this step, you may get a warning message later, which may suggest you use regression tree
+fit <- randomForest(Y ~ .-id, family=binomial, data=credit.data) #full sample
+print(fit) # view results 
+importance(fit) # importance of each predictor
+```
+
+Bagging?
