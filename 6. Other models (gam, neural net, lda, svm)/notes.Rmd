@@ -29,11 +29,11 @@ We remove X9 and id from the data since we will not be using them for prediction
 ```{r}
 credit.data$X9 = NULL
 credit.data$id = NULL
+credit.data$Y = as.factor(credit.data$Y)
 ```
 
 Now split the data 90/10 as training/testing datasets:
 ```{r}
-set.seed(2014);
 subset <- sample(nrow(credit.data),nrow(credit.data)*0.90)
 credit.train = credit.data[subset,]
 credit.test = credit.data[-subset,]
@@ -89,7 +89,6 @@ coef(lasso_fit, s = 0.02)
 ```
 The _s_ parameter determines how many variables are included and you can use cross-validation to choose it.
 
-
 #### Prediction and Cross Validation Using Logistic Regression
 
 ##### Performance on testing set
@@ -99,7 +98,7 @@ To do out-of-sample prediction you need to add the testing set as a second argum
 prob.glm0.outsample <- predict(credit.glm0,credit.test,type="response")
 predicted.glm0.outsample <-  prob.glm0.outsample> 0.2
 predicted.glm0.outsample <- as.numeric(predicted.glm0.outsample)
-table(credit.test$Y, predicted.glm0.outsample, dnn=c("Truth","Predicted"))
+table(credit.test$Y, predicted.glm0.outsample, dnn=c("Observed","Predicted"))
 mean(ifelse(credit.test$Y != predicted.glm0.outsample, 1, 0))
 creditcost(credit.test$Y, predicted.glm0.outsample)
 ```
@@ -152,7 +151,7 @@ credit.gam$deviance
 pcut.gam <- .08
 prob.gam.in<-predict(credit.gam,credit.train,type="response")
 pred.gam.in<-(prob.gam.in>=pcut.gam)*1
-table(credit.train$Y,pred.gam.in,dnn=c("Observation","Prediction"))
+table(credit.train$Y,pred.gam.in,dnn=c("Observed","Predicted"))
 
 ```
 Misclassification rate is
@@ -174,7 +173,7 @@ The following code does a grid search from pcut = 0.01 to pcut = 0.99 with the o
 searchgrid = seq(0.01, 0.20, 0.01)
 #result.gam is a 99x2 matrix, the 1st col stores the cut-off p, the 2nd column stores the cost
 result.gam = cbind(searchgrid, NA)
-#in the cost function, both r and pi are vectors, r=truth, pi=predicted probability
+#in the cost function, both r and pi are vectors, r=Observed, pi=predicted probability
 cost1 <- function(r, pi){
   weight1 = 10
   weight0 = 1
@@ -201,7 +200,7 @@ result.gam[index.min,1] #optimal cutoff probability
 pcut <-  result.gam[index.min,1] 
 prob.gam.out<-predict(credit.gam,credit.test,type="response")
 pred.gam.out<-(prob.gam.out>=pcut)*1
-table(credit.test$Y,pred.gam.out,dnn=c("Observation","Prediction"))
+table(credit.test$Y,pred.gam.out,dnn=c("Observed","Predicted"))
 ```
 mis-classifciation rate is
 ```{r}
@@ -233,7 +232,7 @@ mean(ifelse(credit.train$Y != pred.lda.in, 1, 0))
 #### Out-of-sample
 ```{r}
 lda.out <- predict(credit.lda,newdata=credit.test)
-cut.lda <- .15
+cut.lda <- .12
 pred.lda.out <- as.numeric((lda.out$posterior[,2]>=cut.lda))
 table(credit.test$Y,pred.lda.out,dnn=c("Obs","Pred"))
 mean(ifelse(credit.test$Y != pred.lda.out, 1, 0))
@@ -253,17 +252,19 @@ Boston.nnet<-nnet(medv~.,size=4,data=Boston,linout=TRUE)
 ```
 
 #### Training
-```{r}
+```{r, message=FALSE}
 library(nnet)
-credit.train$Y = as.factor(credit.train$Y)
-caseweights = ifelse(credit.train$Y == 1, 10,1)
-credit.nnet <- nnet(Y~., data=credit.train, size=4, weights = caseweights)
+```
+
+```{r}
+credit.nnet <- nnet(Y~., data=credit.train, size=1, maxit=500)
 ```
 
 #### Out-of-sample Testing
 ```{r}
-pred.nnet= predict(credit.nnet,credit.test, type = "class")
-table(credit.test$Y,pred.nnet,dnn=c("Observation", "Prediction"))
+prob.nnet= predict(credit.nnet,credit.test)
+pred.nnet = as.numeric(prob.nnet > 0.08)
+table(credit.test$Y,pred.nnet, dnn=c("Observed","Predicted"))
 mean(ifelse(credit.test$Y != pred.nnet, 1, 0))
 creditcost(credit.test$Y, pred.nnet)
 ```
@@ -281,18 +282,19 @@ The R package e1071 offers an interface to the most popular svm implementation l
 install.packages('e1071')
 ```
 
-The class.weights option can be used to handle asymmetric cost in our credit data. The other 2 parameters are cost and gamma, the default values are used here.
-
-```{r, message=FALSE}
+```{r}
 library(e1071)
-credit.train$Y = as.factor(credit.train$Y)
-weight1 = 0.93
-m = svm(Y~., data=credit.train, class.weights = c(`1` = weight1, `0` = 1-weight1), cost = 1, gamma = 1/length(credit.train))
-pred.svm = predict(m,credit.test)
-table(credit.test$Y, pred.svm ,dnn=c("Observation", "Prediction"))
+credit.svm = svm(Y ~ ., data = credit.train, cost = 1, gamma = 1/length(credit.train), probability= TRUE)
+prob.svm = predict(credit.svm, credit.test, probability = TRUE)
+prob.svm = attr(prob.svm, 'probabilities')[,2] #This is needed because prob.svm gives a 
+pred.svm = as.numeric((prob.svm >= 0.08))
+table(credit.test$Y,pred.svm,dnn=c("Obs","Pred"))
+mean(ifelse(credit.test$Y != pred.svm, 1, 0))
 creditcost(credit.test$Y, pred.svm)
 ```
 
+credit.svm = svm(Y ~ ., data = credit.train, cost = 1, gamma = 1/length(credit.train), probability= TRUE)
+prob.svm = predict(credit.svm, credit.test)
 
 [go to top](#content)
 ### <a id="compare"></a> Performance Comparisons
@@ -310,6 +312,22 @@ You may compare the following
 * Cost
 * Misclassification Rate
 * ROC curve or Area Under the Curve (AUC)
+
+
+#### Symmetric Cost and Multiclass Problems
+For classification tasks with symmetric costs many of functions can be simplified. You do not have to worry about the cut-off probability and can focus on the tuning parameters in each model (e.g. cost and gamma in SVM).
+
+Different classifiers deal with multiclass classification differently. Logistic regression can be extended to multinomial logistic regression (using _multinom_ function). Many other binary classifiers can use an either "one-vs-all"(train N binary classifiers to distinguish each class from the rest) or "one-vs-one"(train C(N,2) binary classifiers for each possible pair of classes) approach to deal with multiple classes. 
+
+```{r}
+data(iris)
+subset <- sample(nrow(iris),nrow(iris)*0.80)
+iris.train = iris[subset,]
+iris.test = iris[-subset,]
+iris.svm = svm(Species ~ ., data = iris.train)
+table(iris.test$Species, predict(iris.svm, iris.test), dnn=c("Observed","Predicted"))
+```
+
 
 [go to top](#content)
 
