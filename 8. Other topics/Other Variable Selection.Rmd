@@ -23,9 +23,9 @@ The case for using elastic net is [3]:
 * Use elastic net when variables are highly correlated and you want to select more than one predictor variables from a group of correlated variables. Lasso tends to select one variable from a group and ignore the others.
 * Use elastic net when there are more variables than observations.
 
-Here we demonstrate Lasso on Boston Housing data. If you have a binary response you can use _family= "binomial"_ option in the glmnet() function. 
+Here we demonstrate Lasso on Boston Housing data. For parsimony we are not using training/testing split in this example.
 
-
+Note: If you have a binary response you can use _family= "binomial"_ option in the glmnet() function. 
 
 ```{r}
 library(MASS)
@@ -54,6 +54,16 @@ coef(lasso_fit,s=1)
 #use 5-fold cross validation to pick lambda
 cv_lasso_fit = cv.glmnet(x = as.matrix(Boston[, -c(which(colnames(Boston)=='medv'))]), y = Boston$medv, alpha = 1, nfolds = 5)
 plot(cv_lasso_fit)
+```
+The best $\lambda$ (or _s_) is given by:
+```{r}
+cv_lasso_fit$lambda.min
+```
+
+
+Given a selected _s_ you can use _predict()_ this way to get prediction:
+```{r}
+Boston.insample.prediction = predict(lasso_fit, as.matrix(Boston[, -c(which(colnames(Boston)=='medv'))]), s = cv_lasso_fit$lambda.min)
 ```
 
 
