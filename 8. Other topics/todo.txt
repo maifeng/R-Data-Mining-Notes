@@ -21,3 +21,8 @@ importance(fit) # importance of each predictor
 ```
 
 Bagging?
+
+
+Need to scale y for nnet regression?
+Boston.nnet=nnet(formula = medv/max(medv) ~ ., data = Boston_train, size = 4, maxit = 500,linout=F)
+mean((predict(Boston.nnet, Boston_test)*max(Boston_test$medv) - Boston_test$medv)^2)

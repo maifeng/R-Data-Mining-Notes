@@ -47,7 +47,7 @@ creditcost <- function(observed, predicted){
   weight1 = 10
   weight0 = 1
   c1 = (observed==1)&(predicted == 0) #logical vector - true if actual 1 but predict 0
-  c0 = (observed==0)&(predicted == 1) #logical vecotr - true if actual 0 but predict 1
+  c0 = (observed==0)&(predicted == 1) #logical vector - true if actual 0 but predict 1
   return(mean(weight1*c1+weight0*c0))
 }
 ```
@@ -178,7 +178,7 @@ cost1 <- function(r, pi){
   weight1 = 10
   weight0 = 1
   c1 = (r==1)&(pi<pcut) #logical vector - true if actual 1 but predict 0
-  c0 = (r==0)&(pi>pcut) #logical vecotr - true if actual 0 but predict 1
+  c0 = (r==0)&(pi>pcut) #logical vector - true if actual 0 but predict 1
   return(mean(weight1*c1+weight0*c0))
 }
 
