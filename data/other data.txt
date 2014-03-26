@@ -1,0 +1,7 @@
+MovieLens 100k
+100,000 ratings from 1000 users on 1700 movies.
+http://grouplens.org/datasets/movielens/
+
+http://www.infochimps.com/datasets
+
+http://aws.amazon.com/datasets (Instruction: http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-public-data-sets.html) These datasets are really large, in GB or TB

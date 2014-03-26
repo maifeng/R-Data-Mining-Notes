@@ -1,159 +1,159 @@
 Case 2 Lab
 ========================================================
 ### Executive Summary  
-This tutorial illustrates the implentations of clustering and association rule mining in (R), which will help you finish Case Study 2.
+This tutorial illustrates the implentations of clustering and association rule mining in (R).
 
 ****
 <a id="content"></a> Content 
 -------------------
-### [Data] (#data)   
-### [RODBC](#rodbc)   
 ### [Clustering](#cluster)   
 ### [Association Rules](#arules)  
+### [Case 2 Starter Code](#case4)  
 ****
-
-### <a id="data"></a>Cincinnati Zoo Data 
-This lab uses the Cincinnati Zoo Data, which is from former MSQA student Ben Cofie's Master's thesis. A copy of his thesis can be found on BB.
-
-### <a id="rodbc"></a>RODBC package
-The [RODBC](http://cran.r-project.org/web/packages/RODBC/RODBC.pdf) package provides access to databases (including Microsoft Access and Microsoft SQL Server) through an ODBC interface.
-The primary functions are given below. 
-
-Function |Description
-------------|---------------
-odbcConnect(dsn, uid="", pwd="") | Open a connection to an ODBC database
-sqlFetch(channel, sqtable)	 | Read a table from an ODBC database into a data frame
-sqlQuery(channel, query)	| Submit a query to an ODBC database and return the results
-sqlSave(channel, mydf, tablename = sqtable, append = FALSE) | 	Write or update (append=True) a data frame to a table in the ODBC database
-sqlDrop(channel, sqtable)	 | Remove a table from the ODBC database
-close(channel)	| Close the connection
 
 ****
 ### <a id="cluster"></a>Clustering
-Data I/O and Some Preprocessing
-```{r,eval=F}
-#Import raw data from excel
-library(RODBC)
-channel <- odbcConnectExcel("D:/qry_Food_by_Month.xls")
-ZooFood <- sqlFetch(channel, "qry_Food_by_MonthEdited")
-odbcClose(channel)
-```
-**Note:**  *odbcConnectExcel* function is only usable with 32-bit Windows. To change setting in Rstudio, go to Tools -> Options -> General R Versions: select 32 bit R version. You may need to restart Rstudio to make the change take effect.
 
+We use the seeds data set to demonstrate cluster analysis in R. The examined group comprised kernels belonging to three different varieties of wheat: Kama, Rosa and Canadian, 70 elements each. A description of the dataset can be viewed at (https://archive.ics.uci.edu/ml/datasets/seeds)
 
 ```{r}
-load("I:/BANA7047/Case 2/case2 RWSpace.RData")
+seed = read.table('http://archive.ics.uci.edu/ml/machine-learning-databases/00236/seeds_dataset.txt', header=F)
+seed = seed[,1:7]
+colnames(seed) = c("area", "perimeter","campactness", "length", "width", "asymmetry", "groovelength")
 ```
-
+Scale data to have zero mean and unit variance for each column
 ```{r}
-#Delete missing rows with missing data
-ZooFood<-na.omit(ZooFood)
-#Exclude column 1 which contains text from data matrix
-ZooFood.use<- ZooFood [,-1]
-#re-name the rows
-dimnames(ZooFood.use)[[1]] <- ZooFood[,1]
-#Scale data using the column means.
-ZooFood.use<-scale(ZooFood.use) #Scale Data to have zero mean and unit variance for each column
+seed <- scale(seed) 
 ```
 
-
-Determine number of clusters. Here a simple within group sum of squares method is used. For more sophiscated methods, see for example [blog](http://blog.echen.me/2011/03/19/counting-clusters/), or [course notes](http://www.bx.psu.edu/old/courses/bx-fall04/How_Many_Clusters.pdf).
-```{r}
-# Determine number of clusters
-wss <- (nrow(ZooFood.use)-1)*sum(apply(ZooFood.use,2,var))
-for (i in 2:12) wss[i] <- sum(kmeans(ZooFood.use,
-                                     centers=i)$withinss)
-plot(1:12, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
-```
+#### K-means
 
 Use k-means method for clustering and plot results.
 ```{r}
 # K-Means Cluster Analysis
-fit <- kmeans(ZooFood.use, 5) #5 cluster solution
+fit <- kmeans(seed, 5) #5 cluster solution
 #Display number of clusters in each cluster
 table(fit$cluster)
 #Plot cluster in kmeans
+
+```
+
+```{r, eval=FALSE}
 install.packages("fpc")
+```
+
+```{r, message=FALSE, warning=FALSE}
 library(fpc)
-plotcluster(ZooFood.use, fit$cluster)
+plotcluster(seed, fit$cluster)
+````
+```{r, eval=FALSE}
 #See exactly which item are in 1st group
-ZooFood$NickName[fit$cluster==1]
-# get cluster means for scaled data
-aggregate(ZooFood.use,by=list(fit$cluster),FUN=mean)
+seed[fit$cluster==1,]
+```
+```{r}
+#get cluster means for scaled data
+aggregate(seed,by=list(fit$cluster),FUN=mean)
 #or alternatively, use the output of kmeans
 fit$centers
-#get cluster means for raw data
-Ageish<-aggregate(ZooFood[,-c(1,1)],by=list(fit$cluster),FUN=mean)
-Ageish
 ```
+
+#### Determine number of clusters
+Here a simple within group sum of squares method is used. 
+```{r}
+# Determine number of clusters
+wss <- (nrow(seed)-1)*sum(apply(seed,2,var))
+for (i in 2:12) wss[i] <- sum(kmeans(seed,
+                                     centers=i)$withinss)
+plot(1:12, wss, type="b", xlab="Number of Clusters",ylab="Within groups sum of squares")
+```
+
+Prediction strength for estimating number of clusters. The prediction strength is defined according to Tibshirani and Walther (2005), who recommend to choose as optimal number of cluster the largest number of clusters that leads to a prediction strength above 0.8 or 0.9.
+
+```{r}
+prediction.strength(seed, Gmin=2, Gmax=15, M=10,cutoff=0.8)
+```
+
+fpc package has cluster.stat() function that can calcuate other cluster validity measures such as [Average Silhouette Coefficient](http://en.wikipedia.org/wiki/Silhouette_(clustering)) (between -1 and 1, the higher the better), or [Dunn index](http://en.wikipedia.org/wiki/Dunn_index) (betwen 0 and infinity, the higher the better):
+
+```{r}
+d = dist(seed, method = "euclidean")
+result = matrix(nrow = 14, ncol = 3)
+for (i in 2:15){
+  cluster_result = kmeans(seed, i)
+  clusterstat=cluster.stats(d, cluster_result$cluster)
+  result[i-1,1]=i
+  result[i-1,2]=clusterstat$avg.silwidth
+  result[i-1,3]=clusterstat$dunn   
+}
+plot(result[,c(1,2)], type="l", ylab = 'silhouette width', xlab = 'number of clusters')
+plot(result[,c(1,3)], type="l", ylab = 'dunn index', xlab = 'number of clusters')
+
+```
+
+
+
+For more sophiscated methods, see for example [blog](http://blog.echen.me/2011/03/19/counting-clusters/), or [course notes](http://www.bx.psu.edu/old/courses/bx-fall04/How_Many_Clusters.pdf).
+
+#### Hierarchical clustering
 
 ```{r}
 #Wards Method or Hierarchical clustering
 #Calculate the distance matrix
-ZooFood.dist=dist(ZooFood.use)
+seed.dist=dist(seed)
 #Obtain clusters using the Wards method
-ZooFood.hclust=hclust(ZooFood.dist, method="ward")
-plot(ZooFood.hclust)
+seed.hclust=hclust(seed.dist, method="ward")
+plot(seed.hclust)
 #Cut dendrogram at the 3 clusters level and obtain cluster membership
-groupZooFood.3 = cutree(ZooFood.hclust,k=3)
-table(groupZooFood.3)
+seed.3clust = cutree(seed.hclust,k=3)
+```
+
+```{r, eval=FALSE}
 #See exactly which item are in third group
-ZooFood$NickName[groupZooFood.3==3]
+seed[seed.3clust==3,]
+```
+
+```{r, eval=FALSE}
 #get cluster means for raw data
-aggregate(ZooFood[,-c(1,1)],by=list(groupZooFood.3),FUN=mean)
-# Centroid Plot against 1st 2 discriminant functions
+#Centroid Plot against 1st 2 discriminant functions
 #Load the fpc library needed for plotcluster function
 library(fpc)
 #plotcluster(ZooFood, fit$cluster)
-plotcluster(ZooFood.use, groupZooFood.3)
+plotcluster(seed, seed.3clust)
 ```
 
 [go to top](#content)
 ****
 ### <a id="arules"></a>Association Rules
 Association Rules is a popular and well researched method for discovering
-interesting relations between variables in large databases. [*arules*](http://cran.r-project.org/web/packages/arules/arules.pdf) package in R provides a basic infrastructure for creating and manipulating input data sets and for analyzing the resulting itemsets and rules.
+interesting relations between variables in large databases. *arules* package in R provides a basic infrastructure for creating and manipulating input data sets and for analyzing the resulting itemsets and rules. This demonstration uses the Cincinnati Zoo Data, which is from former MSQA student Ben Cofie's Master's thesis. A copy of his thesis can be found on BB.
+* For an introduction to arules and additional case studies see (http://cran.r-project.org/web/packages/arules/vignettes/arules.pdf)
+* For the reference manual for the package see (http://cran.r-project.org/web/packages/arules/arules.pdf))
 
-Data I/O and summary of transaction data
-```{r,eval=FALSE}
-#Import raw data from excel
-library(RODBC)
-channel <- odbcConnectExcel("I:/BANA7047/Case 2/food_4_association.xls")
-TransFood <- sqlFetch(channel, "Sheet1")
-odbcClose(channel)
+The Groceries data set contains 1 month (30 days) of real-world point-of-sale transaction data from a typical local grocery outlet. The data set contains 9835 transactions and the items are aggregated to 169 categories.
+```{r}
+library(arules)
+data("Groceries")
 ```
 
 ```{r}
-load("I:/BANA7047/Case 2/case2 RWSpace.RData")
-
-TransFood.use<- TransFood[,-c(1,1)]
-
-#Load the arules library
-library(arules)
-
-#Transform raw data into matrix form
-TransFood.use<-as(as.matrix(TransFood.use),"transactions")
-#TransFood.use <- as.matrix(TransFood.use)
-
 #run summary report
-summary(TransFood.use)
+summary(Groceries)
 ```
-*as()* function coerce the dataset into transaction data type for association rules mining. *summary()* displays the most frequent items in the data set, information about the transaction
-length distribution and that the data set contains some extended transaction information.
+ *summary()* displays the most frequent items in the data set, information about the transaction length distribution and that the data set contains some extended transaction information.
 We see that the data set contains transaction IDs. This additional information can be used for analyzing the data
 set. 
 
-To find the very long transactions we can use the *size()* and select very long transactions (containing more than 10 items).
+To find the very long transactions we can use the *size()* and select very long transactions (containing more than 25 items).
 ```{r}
 #
-transactionInfo(TransFood.use[size(TransFood.use) > 10])
+x = Groceries[size(Groceries) > 25]
+inspect(x)
 ```
 
 To see which items are important in the data set we can use the *itemFrequencyPlot()*. To reduce the number of items, we only plot the item frequency for items with a support greater than 10%. The label size is reduced with the parameter *cex.names*.
 ```{r}
 #
-itemFrequencyPlot(TransFood.use, support = 0.1, cex.names=0.8)
-
+itemFrequencyPlot(Groceries, support = 0.1, cex.names=0.8)
 ```
 
 
@@ -161,7 +161,7 @@ Use *apriori()* algorithm to find all rules (the default association type for
 *apriori()*) with a minimum support of 1% and a confidence of 0.6.
 ```{r}
 # Run the apriori algorithm
-basket_rules <- apriori(TransFood.use,parameter = list(sup = 0.003, conf = 0.7,target="rules"))
+basket_rules <- apriori(Groceries,parameter = list(sup = 0.003, conf = 0.5,target="rules"))
 
 summary(basket_rules)
 ```
@@ -176,42 +176,94 @@ finding the RHS of the rule in transactions under the condition that these trans
 contain the LHS. Association rules are required to satisfy both a minimum support and a minimum confidence
 constraint at the same time.
 
-* **Lift**: Life is a popular measure of to filter or rank found rules. The lift of a rule is defined as $latex lift(X \Rightarrow Y ) = supp(X \cup Y )/(supp(X)supp(Y ))$. Lift can be interpreted as the deviation of the support of the whole rule from the support expected
+* **Lift**: Lift is a popular measure of to filter or rank found rules. The lift of a rule is defined as $latex lift(X \Rightarrow Y ) = supp(X \cup Y )/(supp(X)supp(Y ))$. Lift can be interpreted as the deviation of the support of the whole rule from the support expected
 under independence given the supports of the LHS and the RHS. Greater lift values indicate
 stronger associations.
 ```{r}
 # Check the generated rules using inspect
-inspect(basket_rules)
+inspect(head(basket_rules))
 ```
 
-As typical for association rule mining, the number of rules found is huge. To analyze these
-rules, for example, subset() can be used to produce separate subsets of rules. Now find the subset of rules that has 3 or more length (lhs+rhs).
+As typical for association rule mining, the number of rules found is huge. To analyze these rules, for example, subset() can be used to produce separate subsets of rules. Now find the subset of rules that has 4 or more length (lhs+rhs).
 ```{r}
-#Basket rules of size greater than 2
-inspect(subset(basket_rules, size(basket_rules)>2))
-
-#Basket rules of size greater than 3
-inspect(subset(basket_rules, size(basket_rules)>3))
-
+#Basket rules of size greater than 4
+inspect(subset(basket_rules, size(basket_rules)>4))
 ```
-There are no rules that have more than 3 items in total (lhs+rhs).
 
-Now find the subset rules that has "Ice Cream ConeFood" in the right hand side. Here we require *lift* measure exceeds 1.2.
+Find the subset of rules with lift greater than 5:
 ```{r}
-icecream.rhs <- subset(basket_rules, subset = rhs %in% "Ice Cream ConeFood" & lift>1.2)
+inspect(subset(basket_rules, lift>5))
+```
+
+
+Now find the subset rules that has Yogurt in the right hand side. Here we require *lift* measure exceeds 1.2.
+```{r}
+yogurt.rhs <- subset(basket_rules, subset = rhs %in% "yogurt" & lift>3.5)
 ```
 Now inspect the subset rules
 ```{r}
-inspect(icecream.rhs)
+inspect(yogurt.rhs)
 ```
 
-Now find the subset rules that has "Bottled WaterFood" in the left hand side.
+Now find the subset rules that has Meat in the left hand side.
 ```{r}
-water.lhs <- subset(basket_rules, subset = lhs %in% "Bottled WaterFood" & lift>1.2)
+meat.lhs <- subset(basket_rules, subset = lhs %in% "meat" & lift>1.5)
 ```
 Now inspect the subset rules
 ```{r}
-inspect(water.lhs)
+inspect(meat.lhs)
 ```
+
+We can use the arulesViz package to visualize the rules, for a more complete introduction see (http://cran.r-project.org/web/packages/arulesViz/vignettes/arulesViz.pdf).
+
+```{r, eval=FALSE}
+install.packages('arulesViz')
+```
+
+```{r, message=FALSE}
+library('arulesViz')
+```
+
+```{r}
+plot(basket_rules)
+```
+
+The plot function has an interactive mode for you to inspect individual rules:
+```{r, eval=FALSE}
+plot(basket_rules, interactive=TRUE)
+```
+
+Graph-based visualization can be used for very small sets of rules. The vertices are represented by items for the 10 rules with highest lift:
+```{r}
+plot(head(sort(basket_rules, by="lift"), 10), method = "graph")
+```
+
+The package comes with an approach to cluster association rules and itemsets:
+```{r}
+plot(basket_rules, method="grouped")
+```
+
 
 [go to top](#content)
+
+### <a id="case4"></a>Case 2 Starter Code
+
+For problem 1 simply use the Iris dataset in R. When doing cluster analysis for Iris you'll want to ignore the Species variable.
+
+```{r, eval=FALSE}
+data(iris)
+```
+
+For problem 2, use the following code to load the transaction data for association rules mining. *as()* function coerce the dataset into transaction data type for association rules mining.
+
+```{r, eval=FALSE}
+TransFood <- read.csv('http://homepages.uc.edu/~maifg/DataMining/data/food_4_association.csv')
+TransFood <- TransFood[, -1]
+TransFood <- as(as.matrix(TransFood), "transactions")
+```
+Load the data for clustering:
+```{r, eval=FALSE}
+Food_by_month <- read.csv('http://homepages.uc.edu/~maifg/DataMining/data/qry_Food_by_Month.csv')
+```
+
+
