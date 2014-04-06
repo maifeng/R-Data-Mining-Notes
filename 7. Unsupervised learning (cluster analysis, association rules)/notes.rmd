@@ -125,7 +125,7 @@ plotcluster(seed, seed.3clust)
 ****
 ### <a id="arules"></a>Association Rules
 Association Rules is a popular and well researched method for discovering
-interesting relations between variables in large databases. *arules* package in R provides a basic infrastructure for creating and manipulating input data sets and for analyzing the resulting itemsets and rules. This demonstration uses the Cincinnati Zoo Data, which is from former MSQA student Ben Cofie's Master's thesis. A copy of his thesis can be found on BB.
+interesting relations between variables in large databases. *arules* package in R provides a basic infrastructure for creating and manipulating input data sets and for analyzing the resulting itemsets and rules. 
 * For an introduction to arules and additional case studies see (http://cran.r-project.org/web/packages/arules/vignettes/arules.pdf)
 * For the reference manual for the package see (http://cran.r-project.org/web/packages/arules/arules.pdf))
 
