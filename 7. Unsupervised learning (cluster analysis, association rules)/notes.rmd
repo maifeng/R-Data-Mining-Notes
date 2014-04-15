@@ -8,7 +8,7 @@ This tutorial illustrates the implentations of clustering and association rule m
 -------------------
 ### [Clustering](#cluster)   
 ### [Association Rules](#arules)  
-### [Case 2 Starter Code](#case4)  
+### [Case Starter Code](#case4)  
 ****
 
 ****
@@ -158,7 +158,7 @@ itemFrequencyPlot(Groceries, support = 0.1, cex.names=0.8)
 
 
 Use *apriori()* algorithm to find all rules (the default association type for
-*apriori()*) with a minimum support of 1% and a confidence of 0.6.
+*apriori()*) with a minimum support of 0.3% and a confidence of 0.5.
 ```{r}
 # Run the apriori algorithm
 basket_rules <- apriori(Groceries,parameter = list(sup = 0.003, conf = 0.5,target="rules"))
@@ -246,7 +246,7 @@ plot(basket_rules, method="grouped")
 
 [go to top](#content)
 
-### <a id="case4"></a>Case 2 Starter Code
+### <a id="case4"></a>Case Starter Code
 
 For problem 1 simply use the Iris dataset in R. When doing cluster analysis for Iris you'll want to ignore the Species variable.
 
