@@ -161,7 +161,7 @@ Recall that ROC Curve gives you the trade-off between hit rate (1 - false positi
 To get ROC curve, we first fit a tree without the loss matrix, then get the predicted probability of Y being 1. The additional cp parameter controls the complexity of tree. Here we change it from its default 0.01 to a smaller value to grow a more complex tree than just the root node (if you use the default the tree you get will tell you to clasify everything as 0). More discussion on this in the next section. 
 
 ```{r}
-credit.rpart2 <- rpart(formula = Y ~ . -id-X9, data = credit.train, method = "class", cp = 0.0005)
+credit.rpart2 <- rpart(formula = Y ~ . -id, data = credit.train, method = "class", parms = list(loss=matrix(c(0,10,1,0), nrow = 2)))
 #Probability of getting 1
 credit.test.prob.rpart2 = predict(credit.rpart2,credit.test, type="prob")
 ```
