@@ -5,4 +5,3 @@ This set of lab notes for undergraduate and graduate data mining class is curren
 Contributors:  
 Shaonan Tian, PhD  
 Chaojiang Wu, PhD  
-Shaobo Li

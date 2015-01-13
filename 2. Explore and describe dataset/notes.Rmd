@@ -112,9 +112,9 @@ iris[(iris$Sepal.Length > 5 & iris$Sepal.Width > 4), ]
 ```{r, eval=FALSE}
 install.packages('sqldf')
 library(sqldf)
-sqldf('select * from iris where Sepal_Length > 5 and Sepal_Width > 4')
+sqldf('select * from iris where `Sepal.Length` > 5 and `Sepal.Width` > 4')
 ```
-Note that in sql . in the variable name is changed to _. 
+In earlier version of sqldf all dots(.) in variable names need to be changed to underscores(_). 
 
 ### Subsetting the dataset III: Random Sample
 The following code random sample (without replacement) 90% of the original dataset and assgin them to a new variable *iris_sample*. 
