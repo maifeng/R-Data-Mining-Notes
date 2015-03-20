@@ -6,9 +6,9 @@ This tutorial helps you to review various supervised learning techniques, introd
 ****  
 <a id="content"></a> Content 
 -------------------
-### [Credit Score Data] (#data)   
+### [Credit Score Data](#cdata)   
 ### [Generalized Linear Models](#glm)   
-### [Tree Models (omitted)](#tree)   
+### Tree Models (omitted)  
 ### [Generalized Additive Models (GAM)](#gam)  
 ### [Discriminant Analysis](#da)
 ### [Neural Networks Models](#nnet)
@@ -17,7 +17,7 @@ This tutorial helps you to review various supervised learning techniques, introd
 ### [Starter Code for German Credit Score](#german)
 ****
 
-### <a id="data"></a>Credit Score Data <a id="data"></a>
+### <a id="cdata">Credit Score Data </a>
 #### Load Data
 
 
@@ -34,9 +34,9 @@ credit.data$Y = as.factor(credit.data$Y)
 
 Now split the data 90/10 as training/testing datasets:
 ```{r}
-subset <- sample(nrow(credit.data),nrow(credit.data)*0.90)
-credit.train = credit.data[subset,]
-credit.test = credit.data[-subset,]
+id_train <- sample(nrow(credit.data),nrow(credit.data)*0.90)
+credit.train = credit.data[id_train,]
+credit.test = credit.data[-id_train,]
 ```
 The training dataset has 61 variables, 4500 obs. 
 
@@ -245,8 +245,11 @@ creditcost(credit.test$Y, pred.lda.out)
 Neural Networks method (in-sample and out-of-sample performance measure) is illustrated here. The package [**nnet**](http://cran.r-project.org/web/packages/nnet/nnet.pdf) is used for this purpose.
 
 __Note__: 
+
 * For classification problems with nnet you need to code the response to _factor_ first. In addition you want to add type = "class" for _predict()_  function. 
-* For regression problems add lineout = TRUE when training model
+
+* For regression problems add lineout = TRUE when training model. In addition, the response needs to be standardized to $[0, 1]$ interval.
+
 ```{r, eval=FALSE}
 Boston.nnet<-nnet(medv~.,size=4,data=Boston,linout=TRUE)
 ```
@@ -321,9 +324,9 @@ Different classifiers deal with multiclass classification differently. Logistic 
 
 ```{r}
 data(iris)
-subset <- sample(nrow(iris),nrow(iris)*0.80)
-iris.train = iris[subset,]
-iris.test = iris[-subset,]
+id_train <- sample(nrow(iris),nrow(iris)*0.80)
+iris.train = iris[id_train,]
+iris.test = iris[-id_train,]
 iris.svm = svm(Species ~ ., data = iris.train)
 table(iris.test$Species, predict(iris.svm, iris.test), dnn=c("Observed","Predicted"))
 ```

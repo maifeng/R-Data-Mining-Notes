@@ -14,9 +14,9 @@ credit.data <- read.csv("http://homepages.uc.edu/~maifg/7040/credit0.csv", heade
 
 Now split the data 90/10 as training/testing datasets:
 ```{r}
-sample_index <- sample(nrow(credit.data),nrow(credit.data)*0.90)
-credit.train = credit.data[sample_index,]
-credit.test = credit.data[-sample_index,]
+id_train <- sample(nrow(credit.data),nrow(credit.data)*0.90)
+credit.train = credit.data[id_train,]
+credit.test = credit.data[-id_train,]
 ```
 The training dataset has 63 variables, 4500 obs. 
 ```{r}

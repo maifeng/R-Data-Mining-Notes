@@ -1,11 +1,6 @@
 Explore Iris Dataset
 ========================================================
 
-Outline of this lab
-------------
-1. Install Rattle
-2. Exploration and basic visualization using R/Rattle
-3. Start with Case #1
 
 Iris dataset - Introduction
 --------------
@@ -30,6 +25,11 @@ data(iris)
 ```
 
 ### What is in the dataset?
+You can use `head()` or `tail` to print the first or last few rows of a dataset:
+```{r}
+head(iris)
+```
+
 Check dimensionality, the dataset has 150 rows(observations) and 5 columns (variables)
 ```{r dim}
 dim(iris)
@@ -58,9 +58,9 @@ colnames(iris)
 str(iris)
 ```
 
-By default, R treat strings as factors (or categorical variables), in many situations  (for example, building a regression model) this is what you want because R can automatically create "dummy variables" from the factors. However when merging data from different sources this can cause errors. In this case you can use _stringsAsFactors = FALSE_ option in _read.table_.
+By default, R treat strings as factors (or categorical variables), in many situations  (for example, building a regression model) this is what you want because R can automatically create "dummy variables" from the factors. However when merging data from different sources this can cause errors. In this case you can use `stringsAsFactors = FALSE` option in `read.table`.
 
-### Subsetting the dataset I: Numerical Index and Variable Names
+### Subsetting the Dataset I: Numerical Index and Variable Names
  Get the first 5 rows/obs
 ```{r first5}
 iris[1:5,]
@@ -79,7 +79,7 @@ or you can use the column index instead of variable names. Since Sepal.Length is
 iris[1:10, 1]
 ```
 
-### Subsetting the dataset II: Logical Conditions
+### Subsetting the Dataset II: Logical Conditions
 There are 3 ways to get subsets of data that satisfy certain logical conditions. These kind of operations are called filtering in Excel. Knowing any one of these well is enough. Do not worry about memorizing the syntax, you can always look them up.
 
 Suppose we want to get the **observations that have Sepal.Length > 5 and Sepal.Width > 4**.
@@ -116,12 +116,32 @@ sqldf('select * from iris where `Sepal.Length` > 5 and `Sepal.Width` > 4')
 ```
 In earlier version of sqldf all dots(.) in variable names need to be changed to underscores(_). 
 
-### Subsetting the dataset III: Random Sample
+### Subsetting the Dataset III: Random Sample
 The following code random sample (without replacement) 90% of the original dataset and assgin them to a new variable *iris_sample*. 
 ```{r}
 iris_sample = iris[sample(x = nrow(iris), size = nrow(iris)*0.90),]
 ```
 
+The `dplyr` package provides more convinient ways for generating random samples. You can take a fixed number of samples using `sample_n()` or a fraction using `sample_frac()` as follows
+```{r, eval=FALSE}
+install.packages('dplyr')
+library(dplyr)
+iris_sample = sample_frac(iris, 0.9)
+```
+
+### Sorting
+Sorting by one or more variables is a common operation that you can do with datasets. With RStudio version 0.99+, you can sort a dataset when viewing it by clicking column header. 
+
+To do it with code, let's suppose that you would like to find the top 5 rows in `iris` dataset with largest `Sepal.Length`.
+
+```{r}
+iris[order(iris$Sepal.Length, decreasing = TRUE)[1:5], ] 
+```
+
+The syntax is cleaner with the `arrange()` function in the `dplyr` package:
+```{r, eval=FALSE}
+arrange(iris, desc(Sepal.Length))[1:5, ]
+```
 
 
 ### Summary Statistics and Plots
@@ -174,7 +194,7 @@ faces(iris[1:20,1:4],main="Faces for Iris Data",label=iris$Species[1:20])
 
 ### Cluster Analysis
 #### K-means clustering
-K-means clustering with 5 clusters, the 'fpc' package provides the 'plotcluster' function. You need to run _install.packages('fpc')_ to install it first.
+K-means clustering with 5 clusters, the 'fpc' package provides the 'plotcluster' function. You need to run `install.packages('fpc')` to install it first.
 
 ```{r, eval=FALSE}
 install.packages("fpc")
@@ -207,6 +227,3 @@ rect.hclust(hc_result, k=3)
 
 3 things happened in the first line. First dist(iris[, 1:4]) calculates the distance matrix between observations (how similar the observations are from each other judging from the 4 numerical variables). Then hclust takes the distance matrix as input and gives a hierarchical cluster solution. At last the solution is assigned to the variable hc_result. In hierarchical clustering you do not need to give the number of how many clusters you want, it depends on how you cut the dendrogram. 
 
-### Analysis Using Rattle
-Similar analysis can be done using Rattle. You can follow this video or play around yourself:
-http://www.youtube.com/watch?v=7P16fj0tqa4&hd=1
