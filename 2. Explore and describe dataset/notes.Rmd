@@ -129,6 +129,18 @@ library(dplyr)
 iris_sample = sample_frac(iris, 0.9)
 ```
 
+
+The `dplyr` package provides more convinient ways for generating random samples. You can take a fixed number of samples using `sample_n()` or a fraction using `sample_frac()` as follows
+```{r, eval=FALSE}
+install.packages('dplyr')
+library(dplyr)
+iris_sample = sample_frac(iris, 0.9)
+# using dplyr for logical subsetting
+filter(iris, Sepal.Length> 5, Sepal.Width > 4)
+```
+I recommend you to go through the [`dplyr` tutorial](https://cran.rstudio.com/web/packages/dplyr/vignettes/introduction.html) and [lubridate tutorial](http://vita.had.co.nz/papers/lubridate.html). They make common data manipulation tasks and dealing with time-date much easier in R.
+
+
 ### Sorting
 Sorting by one or more variables is a common operation that you can do with datasets. With RStudio version 0.99+, you can sort a dataset when viewing it by clicking column header. 
 

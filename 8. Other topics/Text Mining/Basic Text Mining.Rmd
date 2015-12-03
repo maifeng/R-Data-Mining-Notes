@@ -1,0 +1,163 @@
+---
+title: "Basic Text Mining with R"
+output: html_document
+---
+
+In this lab we will demonstrate the basic steps of using R to build a predictive model for movie review sentiments. Source of the data is from http://www.cs.cornell.edu/people/pabo/movie-review-data/.
+
+# Import data and representation
+
+First install and load packages needed for text mining.
+```{r, eval=FALSE}
+install.packages(c('tm', 'SnowballC', 'wordcloud', 'topicmodels'))
+```
+
+```{r, warning = FALSE}
+library(tm)
+library(SnowballC)
+library(wordcloud)
+```
+
+Next we load the move review dataset
+```{r}
+reviews = read.csv("movie_reviews.csv", stringsAsFactors = F, row.names = 1)
+```
+
+The review dataset has two variables: *content* of the review, and *polarity* of the review (0 or 1). To use the _tm_ package we first transfrom the dataset to a corpus:
+```{r}
+review_corpus = Corpus(VectorSource(reviews$content))
+```
+Next we normalize the texts in the reviews using a series of pre-processing steps:
+1. Switch to lower case
+2. Remove numbers
+3. Remove punctuation marks and stopwords
+4. Remove extra whitespaces
+
+```{r}
+review_corpus = tm_map(review_corpus, content_transformer(tolower))
+review_corpus = tm_map(review_corpus, removeNumbers)
+review_corpus = tm_map(review_corpus, removePunctuation)
+review_corpus = tm_map(review_corpus, removeWords, c("the", "and", stopwords("english")))
+review_corpus =  tm_map(review_corpus, stripWhitespace)
+```
+
+After the above transformations the first review looks like
+```{r}
+inspect(review_corpus[1])
+```
+
+To analyze the textual data, we use a Document-Term Matrix (DTM) representation: documents as the rows, terms/words as the columns, frequency of the term in the document as the entries. Because the number of unique words in the corpus the dimension can be large.
+
+```{r}
+review_dtm <- DocumentTermMatrix(review_corpus)
+review_dtm
+inspect(review_dtm[500:505, 500:505])
+```
+
+To reduce the dimension of the DTM, we can emove the less frequent terms such that the sparsity is less than 0.95
+```{r}
+review_dtm = removeSparseTerms(review_dtm, 0.99)
+review_dtm
+```
+
+The first review now looks like
+```{r}
+inspect(review_dtm[1,1:20])
+```
+
+We can draw a simple word cloud
+```{r, warning=FALSE}
+findFreqTerms(review_dtm, 1000)
+freq = data.frame(sort(colSums(as.matrix(review_dtm)), decreasing=TRUE))
+wordcloud(rownames(freq), freq[,1], max.words=50, colors=brewer.pal(1, "Dark2"))
+```
+
+One may argue that in the wordcloud, words such as _one_, _film_, _movie_ do not carry too much meaning in the setting, since we know that the entire corpus is about movies. Therefore sometimes it is necessary to use the [tf–idf(term frequency–inverse document frequency)](https://en.wikipedia.org/wiki/Tf%E2%80%93idf) instead of the frequencies of the term as entries, tf-idf measures the relative importance of a word to a document.
+
+```{r}
+review_dtm_tfidf <- DocumentTermMatrix(review_corpus, control = list(weighting = weightTfIdf))
+review_dtm_tfidf = removeSparseTerms(review_dtm_tfidf, 0.95)
+review_dtm_tfidf
+# The first document
+inspect(review_dtm_tfidf[1,1:20])
+```
+
+Is the new word cloud more informative? 
+```{r, warning= FALSE}
+freq = data.frame(sort(colSums(as.matrix(review_dtm_tfidf)), decreasing=TRUE))
+wordcloud(rownames(freq), freq[,1], max.words=100, colors=brewer.pal(1, "Dark2"))
+```
+
+## Predictive modeling
+
+To predict the polarity (sentiment) of a review, we can make use of a precompiled list of words with positive and negative meanings ([Source](http://www.cs.uic.edu/~liub/FBS/sentiment-analysis.html)
+
+```{r}
+neg_words = read.table("negative-words.txt", header = F, stringsAsFactors = F)[, 1]
+pos_words = read.table("positive-words.txt", header = F, stringsAsFactors = F)[, 1]
+```
+
+As simple indicators, we create two variables (neg, pos) that contain the number of positive and negative words in each document
+```{r}
+reviews$neg = sapply(review_corpus, tm_term_score, neg_words)
+reviews$pos = sapply(review_corpus, tm_term_score, pos_words)
+```
+
+Let's remove the actual texual content for statistical model building
+```{r}
+reviews$content = NULL
+```
+Now we can combine the tf-idf matrix with the sentiment polarity according to the sentiment lists. 
+```{r}
+reviews = cbind(reviews, as.matrix(review_dtm_tfidf))
+reviews$polarity = as.factor(reviews$polarity)
+```
+
+Split to testing and training set
+```{r}
+id_train <- sample(nrow(reviews),nrow(reviews)*0.80)
+reviews.train = reviews[id_train,]
+reviews.test = reviews[-id_train,]
+```
+
+The rest should be natural for you by this point. We can compare the performance of logistic regression, decision tree, SVM, and neural network models.
+```{r, eval=FALSE}
+install.packages(c('rpart', 'rpart.plot', 'e1071', 'nnet'))
+```
+```{r, warning=FALSE}
+library(rpart)
+library(rpart.plot)
+library(e1071)
+library(nnet)
+```
+
+Train models:
+```{r, warning=FALSE}
+reviews.tree = rpart(polarity~.,  method = "class", data = reviews.train);  
+prp(reviews.tree)
+reviews.glm = glm(polarity~ ., family = "binomial", data =reviews.train, maxit = 100);  
+reviews.svm = svm(polarity~., data = reviews.train);
+reviews.nnet = nnet(polarity~., data=reviews.train, size=1, maxit=500)
+```
+
+Evaluate performance with the test set:
+```{r}
+pred.tree = predict(reviews.tree, reviews.test,  type="class")
+table(reviews.test$polarity,pred.tree,dnn=c("Obs","Pred"))
+mean(ifelse(reviews.test$polarity != pred.tree, 1, 0))
+
+pred.glm = as.numeric(predict(reviews.glm, reviews.test, type="response") > 0.5)
+table(reviews.test$polarity,pred.glm,dnn=c("Obs","Pred"))
+mean(ifelse(reviews.test$polarity != pred.glm, 1, 0))
+
+pred.svm = predict(reviews.svm, reviews.test)
+table(reviews.test$polarity,pred.svm,dnn=c("Obs","Pred"))
+mean(ifelse(reviews.test$polarity != pred.svm, 1, 0))
+
+prob.nnet= predict(reviews.nnet,reviews.test)
+pred.nnet = as.numeric(prob.nnet > 0.5)
+table(reviews.test$polarity, pred.nnet, dnn=c("Obs","Pred"))
+mean(ifelse(reviews.test$polarity != pred.nnet, 1, 0))
+```
+
+
